@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsip Surat BPHL Wilayah I</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png/960px-Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+        /* Style for disabled button */
+        button:disabled {
+            cursor: not-allowed;
+            background-color: #9ca3af; /* bg-gray-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+
+            <!-- Header Section -->
+            <div class="text-center mb-8">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png/960px-Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png" alt="Logo Kementerian Kehutanan" class="h-20 w-auto mx-auto mb-4">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Arsip Surat Masuk dan Keluar</h1>
+                <p class="mt-2 text-gray-600">katalog pencarian surat masuk & keluar BPHL WIlayah I</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative mb-6">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari berdasarkan kata kunci apa pun (nomor, deskripsi, tujuan, dll)...">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mb-8">
+                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">
+                    Lihat Semua Dokumen
+                </button>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="statusMessage" class="text-center text-gray-600 my-10"></div>
+
+            <!-- Catalog Display -->
+            <div id="catalogContainer" class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Document items will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const catalogContainer = document.getElementById('catalogContainer');
+        const statusMessage = document.getElementById('statusMessage');
+        const showAllButton = document.getElementById('showAllButton');
+
+        let allDocuments = [];
+        const originalSearchPlaceholder = "Cari berdasarkan kata kunci apa pun (nomor, deskripsi, tujuan, dll)...";
+
+        // Google Sheet URL is embedded here
+        const embeddedSheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYnngyyUUAe0raTiZK_dvhRiN1yH_bpnOg-4XdIS9Xhu2H75QlMwYaIe-wR0MAalPCRuDAZLNOJQp1/pub?output=csv';
+
+        function robustParseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            const headers = lines.shift().trim().split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            const records = [];
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                let values = [];
+                let currentVal = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+
+                    if (char === '"') {
+                        if (inQuotes && line[i+1] === '"') { // Handle escaped quote ""
+                            currentVal += '"';
+                            i++; // Skip next quote
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentVal.trim().replace(/\r/g, ''));
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                values.push(currentVal.trim().replace(/\r/g, ''));
+
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index] || '';
+                });
+                records.push(obj);
+            }
+            return records;
+        }
+
+
+        function renderCatalog(documents) {
+            catalogContainer.innerHTML = '';
+            statusMessage.textContent = '';
+
+            if (documents.length === 0 && searchInput.value) {
+                statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
+                return;
+            }
+             if (documents.length === 0 && !searchInput.value) {
+                // This state is reached when "Lihat Semua" is clicked but there are no documents.
+                // Or initially before search. We let other messages handle this.
+             }
+
+
+            documents.forEach((doc, index) => {
+                const itemHTML = `
+                    <div class="border-b border-gray-200 last:border-b-0">
+                        <!-- Main visible part -->
+                        <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="toggleDetails(${index})">
+                            <div class="flex-grow">
+                                <div class="flex flex-wrap items-center gap-x-3 mb-2">
+                                    <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-1 rounded-full">${doc.tgl_surat || 'Tanpa Tanggal'}</span>
+                                    <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${doc.jenis_naskah || 'Jenis Naskah -'}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800">${doc.info_arsip || 'Info Arsip -'}</h3>
+                                <p class="text-gray-600 text-sm mt-1">${doc.no_surat || 'Tanpa Nomor Surat'}</p>
+                            </div>
+                            <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
+                                <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">
+                                    Lihat Detail
+                                </button>
+                                <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">
+                                    Buka Tautan
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Collapsible details part -->
+                        <div id="details-${index}" class="details-content">
+                            <div class="p-5 border-t border-gray-200">
+                                <h4 class="font-bold text-lg mb-3 text-gray-800">Informasi Lengkap</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                                    <p><strong class="font-medium text-gray-500">Kode Klasifikasi:</strong> ${doc.kode_klasifikasi}</p>
+                                    <p><strong class="font-medium text-gray-500">Asal Surat:</strong> ${doc.asal_surat}</p>
+                                    <p><strong class="font-medium text-gray-500">Nomor Surat:</strong> ${doc.no_surat}</p>
+                                    <p><strong class="font-medium text-gray-500">Jenis Naskah:</strong> ${doc.jenis_naskah}</p>
+                                    <p><strong class="font-medium text-gray-500">Info Arsip:</strong> ${doc.info_arsip}</p>
+                                    <p><strong class="font-medium text-gray-500">Tanggal Surat:</strong> ${doc.tgl_surat}</p>
+                                    <p><strong class="font-medium text-gray-500">Status Dokumen:</strong> ${doc.status_dokumen}</p>
+                                    <p><strong class="font-medium text-gray-500">Tujuan Surat:</strong> ${doc.tujuan_surat}</p>
+                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen}</p>
+                                    <div class="md:col-span-2"><strong class="font-medium text-gray-500">Deskripsi:</strong> ${doc.deskripsi_surat}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                catalogContainer.innerHTML += itemHTML;
+            });
+        }
+
+        function toggleDetails(index) {
+            const detailsContent = document.getElementById(`details-${index}`);
+            if (detailsContent) {
+                if (detailsContent.style.maxHeight) {
+                    detailsContent.style.maxHeight = null;
+                } else {
+                    detailsContent.style.maxHeight = detailsContent.scrollHeight + "px";
+                }
+            }
+        }
+        
+        async function fetchAndDisplayData() {
+            const url = embeddedSheetURL;
+
+            statusMessage.textContent = 'Memuat data...';
+            searchInput.disabled = true;
+            searchInput.placeholder = 'Mohon tunggu, data sedang dimuat...';
+            showAllButton.disabled = true;
+            showAllButton.textContent = 'Memuat...';
+            
+            try {
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                
+                const csvText = await response.text();
+                allDocuments = robustParseCSV(csvText);
+                statusMessage.textContent = 'Ketik untuk mencari, atau klik "Lihat Semua Dokumen".';
+
+            } catch (error) {
+                console.error('Gagal mengambil atau mem-parsing data:', error);
+                statusMessage.innerHTML = `
+                    <p class="text-red-600">Gagal memuat data.</p>
+                    <p class="text-sm text-gray-500 mt-1">Ini mungkin terjadi karena masalah jaringan atau layanan proxy sedang tidak aktif. Silakan coba muat ulang halaman.</p>
+                `;
+            } finally {
+                searchInput.disabled = false;
+                searchInput.placeholder = originalSearchPlaceholder;
+                showAllButton.disabled = false;
+                showAllButton.textContent = 'Lihat Semua Dokumen';
+            }
+        }
+        
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (!searchTerm) {
+                catalogContainer.innerHTML = '';
+                if (allDocuments.length > 0) {
+                    statusMessage.textContent = 'Ketik untuk mencari, atau klik "Lihat Semua Dokumen".';
+                }
+                return;
+            }
+
+            const filteredDocuments = allDocuments.filter(doc => {
+                const isYearSearch = /^\d{4}$/.test(searchTerm);
+
+                if (isYearSearch) {
+                    // If searching for a 4-digit year, only check the date field for a whole word match.
+                    const lowerCaseDate = String(doc.tgl_surat).toLowerCase();
+                    const dateWords = lowerCaseDate.replace(/,/g, '').split(/\s+/);
+                    return dateWords.includes(searchTerm);
+                }
+
+                // For all other searches, use the flexible logic across all fields.
+                return Object.entries(doc).some(([key, value]) => {
+                    if (key === 'link_surat') return false;
+
+                    const lowerCaseValue = String(value).toLowerCase();
+
+                    // Specific 'whole word' logic for date field
+                    if (key === 'tgl_surat') {
+                        const dateWords = lowerCaseValue.replace(/,/g, '').split(/\s+/);
+                        const searchWords = searchTerm.split(/\s+/);
+                        return searchWords.every(word => dateWords.includes(word));
+                    }
+                    
+                    // Default 'contains' logic for other fields
+                    return lowerCaseValue.includes(searchTerm);
+                });
+            });
+
+            renderCatalog(filteredDocuments);
+        }
+
+        searchInput.addEventListener('input', handleSearch);
+        showAllButton.addEventListener('click', () => {
+             renderCatalog(allDocuments);
+        });
+
+        window.addEventListener('load', fetchAndDisplayData);
+    </script>
+</body>
+</html>
+
