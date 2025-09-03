@@ -15,12 +15,11 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
-            background-color: #f9fafb; /* bg-gray-50 */
+            background-color: #f9fafb;
         }
-        /* Style for disabled button */
         button:disabled {
             cursor: not-allowed;
-            background-color: #9ca3af; /* bg-gray-400 */
+            background-color: #9ca3af;
         }
     </style>
 </head>
@@ -36,44 +35,42 @@
                 <p class="mt-2 text-gray-600">katalog pencarian surat masuk & keluar BPHL WIlayah I</p>
             </div>
 
-            <!-- Search Bar -->
+            <!-- Search Section -->
             <div class="relative mb-6">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                     </svg>
                 </div>
-                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari berdasarkan kata kunci apa pun (nomor, deskripsi, tujuan, dll)...">
+                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari berdasarkan kata kunci...">
             </div>
-
-            <!-- Action Buttons -->
+            
             <div class="text-center mb-8">
-                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">
-                    Lihat Semua Dokumen
-                </button>
+                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Lihat Semua Dokumen</button>
             </div>
 
-            <!-- Status Messages -->
+            <!-- Status and Catalog Container -->
             <div id="statusMessage" class="text-center text-gray-600 my-10"></div>
-
-            <!-- Catalog Display -->
             <div id="catalogContainer" class="border border-gray-200 rounded-lg overflow-hidden">
-                <!-- Document items will be injected here by JavaScript -->
+                <!-- Catalog items will be inserted here -->
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
+            <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
+            <p class="font-mono">V.1.1</p>
+        </footer>
     </div>
 
     <script>
+        let allDocuments = [];
+
         const searchInput = document.getElementById('searchInput');
         const catalogContainer = document.getElementById('catalogContainer');
         const statusMessage = document.getElementById('statusMessage');
         const showAllButton = document.getElementById('showAllButton');
-
-        let allDocuments = [];
-        const originalSearchPlaceholder = "Cari berdasarkan kata kunci apa pun (nomor, deskripsi, tujuan, dll)...";
-
-        // Google Sheet URL is embedded here
-        const embeddedSheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYnngyyUUAe0raTiZK_dvhRiN1yH_bpnOg-4XdIS9Xhu2H75QlMwYaIe-wR0MAalPCRuDAZLNOJQp1/pub?output=csv';
+        const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYnngyyUUAe0raTiZK_dvhRiN1yH_bpnOg-4XdIS9Xhu2H75QlMwYaIe-wR0MAalPCRuDAZLNOJQp1/pub?output=csv';
 
         function robustParseCSV(csvText) {
             const lines = csvText.trim().split('\n');
@@ -93,9 +90,9 @@
                     const char = line[i];
 
                     if (char === '"') {
-                        if (inQuotes && line[i+1] === '"') { // Handle escaped quote ""
+                        if (inQuotes && line[i+1] === '"') { 
                             currentVal += '"';
-                            i++; // Skip next quote
+                            i++;
                         } else {
                             inQuotes = !inQuotes;
                         }
@@ -117,7 +114,6 @@
             return records;
         }
 
-
         function renderCatalog(documents) {
             catalogContainer.innerHTML = '';
             statusMessage.textContent = '';
@@ -126,16 +122,10 @@
                 statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
                 return;
             }
-             if (documents.length === 0 && !searchInput.value) {
-                // This state is reached when "Lihat Semua" is clicked but there are no documents.
-                // Or initially before search. We let other messages handle this.
-             }
-
 
             documents.forEach((doc, index) => {
                 const itemHTML = `
                     <div class="border-b border-gray-200 last:border-b-0">
-                        <!-- Main visible part -->
                         <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="toggleDetails(${index})">
                             <div class="flex-grow">
                                 <div class="flex flex-wrap items-center gap-x-3 mb-2">
@@ -146,29 +136,24 @@
                                 <p class="text-gray-600 text-sm mt-1">${doc.no_surat || 'Tanpa Nomor Surat'}</p>
                             </div>
                             <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
-                                <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">
-                                    Lihat Detail
-                                </button>
-                                <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">
-                                    Buka Tautan
-                                </a>
+                                <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">Lihat Detail</button>
+                                <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Buka Tautan</a>
                             </div>
                         </div>
-                        <!-- Collapsible details part -->
                         <div id="details-${index}" class="details-content">
                             <div class="p-5 border-t border-gray-200">
                                 <h4 class="font-bold text-lg mb-3 text-gray-800">Informasi Lengkap</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                                    <p><strong class="font-medium text-gray-500">Kode Klasifikasi:</strong> ${doc.kode_klasifikasi}</p>
-                                    <p><strong class="font-medium text-gray-500">Asal Surat:</strong> ${doc.asal_surat}</p>
-                                    <p><strong class="font-medium text-gray-500">Nomor Surat:</strong> ${doc.no_surat}</p>
-                                    <p><strong class="font-medium text-gray-500">Jenis Naskah:</strong> ${doc.jenis_naskah}</p>
-                                    <p><strong class="font-medium text-gray-500">Info Arsip:</strong> ${doc.info_arsip}</p>
-                                    <p><strong class="font-medium text-gray-500">Tanggal Surat:</strong> ${doc.tgl_surat}</p>
-                                    <p><strong class="font-medium text-gray-500">Status Dokumen:</strong> ${doc.status_dokumen}</p>
-                                    <p><strong class="font-medium text-gray-500">Tujuan Surat:</strong> ${doc.tujuan_surat}</p>
-                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen}</p>
-                                    <div class="md:col-span-2"><strong class="font-medium text-gray-500">Deskripsi:</strong> ${doc.deskripsi_surat}</div>
+                                    <p><strong class="font-medium text-gray-500">Kode Klasifikasi:</strong> ${doc.kode_klasifikasi || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Asal Surat:</strong> ${doc.asal_surat || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Nomor Surat:</strong> ${doc.no_surat || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Jenis Naskah:</strong> ${doc.jenis_naskah || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Info Arsip:</strong> ${doc.info_arsip || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Tanggal Surat:</strong> ${doc.tgl_surat || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Status Dokumen:</strong> ${doc.status_dokumen || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Tujuan Surat:</strong> ${doc.tujuan_surat || '-'}</p>
+                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen || '-'}</p>
+                                    <div class="md:col-span-2"><strong class="font-medium text-gray-500">Deskripsi:</strong> ${doc.deskripsi_surat || '-'}</div>
                                 </div>
                             </div>
                         </div>
@@ -178,8 +163,8 @@
             });
         }
 
-        function toggleDetails(index) {
-            const detailsContent = document.getElementById(`details-${index}`);
+        function toggleDetails(docIndex) {
+            const detailsContent = document.getElementById(`details-${docIndex}`);
             if (detailsContent) {
                 if (detailsContent.style.maxHeight) {
                     detailsContent.style.maxHeight = null;
@@ -188,73 +173,57 @@
                 }
             }
         }
-        
-        async function fetchAndDisplayData() {
-            const url = embeddedSheetURL;
 
+        async function fetchAndDisplayData() {
             statusMessage.textContent = 'Memuat data...';
             searchInput.disabled = true;
-            searchInput.placeholder = 'Mohon tunggu, data sedang dimuat...';
+            searchInput.placeholder = 'Mohon tunggu...';
             showAllButton.disabled = true;
             showAllButton.textContent = 'Memuat...';
-            
+
             try {
-                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(sheetURL)}`;
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                if (!response.ok) throw new Error(`Network response was not ok`);
                 
                 const csvText = await response.text();
                 allDocuments = robustParseCSV(csvText);
-                statusMessage.textContent = 'Ketik untuk mencari, atau klik "Lihat Semua Dokumen".';
-
+                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di bawah.';
             } catch (error) {
                 console.error('Gagal mengambil atau mem-parsing data:', error);
-                statusMessage.innerHTML = `
-                    <p class="text-red-600">Gagal memuat data.</p>
-                    <p class="text-sm text-gray-500 mt-1">Ini mungkin terjadi karena masalah jaringan atau layanan proxy sedang tidak aktif. Silakan coba muat ulang halaman.</p>
-                `;
+                statusMessage.innerHTML = `<p class="text-red-600">Gagal memuat data. Coba muat ulang halaman.</p>`;
             } finally {
                 searchInput.disabled = false;
-                searchInput.placeholder = originalSearchPlaceholder;
+                searchInput.placeholder = 'Cari berdasarkan kata kunci...';
                 showAllButton.disabled = false;
                 showAllButton.textContent = 'Lihat Semua Dokumen';
             }
         }
-        
+
         function handleSearch() {
             const searchTerm = searchInput.value.toLowerCase().trim();
+            
             if (!searchTerm) {
-                catalogContainer.innerHTML = '';
-                if (allDocuments.length > 0) {
-                    statusMessage.textContent = 'Ketik untuk mencari, atau klik "Lihat Semua Dokumen".';
-                }
+                renderCatalog([]);
+                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di bawah.';
                 return;
             }
 
             const filteredDocuments = allDocuments.filter(doc => {
                 const isYearSearch = /^\d{4}$/.test(searchTerm);
-
                 if (isYearSearch) {
-                    // If searching for a 4-digit year, only check the date field for a whole word match.
                     const lowerCaseDate = String(doc.tgl_surat).toLowerCase();
                     const dateWords = lowerCaseDate.replace(/,/g, '').split(/\s+/);
                     return dateWords.includes(searchTerm);
                 }
-
-                // For all other searches, use the flexible logic across all fields.
                 return Object.entries(doc).some(([key, value]) => {
                     if (key === 'link_surat') return false;
-
                     const lowerCaseValue = String(value).toLowerCase();
-
-                    // Specific 'whole word' logic for date field
                     if (key === 'tgl_surat') {
                         const dateWords = lowerCaseValue.replace(/,/g, '').split(/\s+/);
                         const searchWords = searchTerm.split(/\s+/);
                         return searchWords.every(word => dateWords.includes(word));
                     }
-                    
-                    // Default 'contains' logic for other fields
                     return lowerCaseValue.includes(searchTerm);
                 });
             });
@@ -264,11 +233,10 @@
 
         searchInput.addEventListener('input', handleSearch);
         showAllButton.addEventListener('click', () => {
-             renderCatalog(allDocuments);
+            renderCatalog(allDocuments);
         });
 
         window.addEventListener('load', fetchAndDisplayData);
     </script>
 </body>
 </html>
-
