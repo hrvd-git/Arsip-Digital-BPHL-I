@@ -15,11 +15,15 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
-            background-color: #f9fafb;
+            background-color: #f9fafb; /* bg-gray-50 */
         }
         button:disabled {
             cursor: not-allowed;
-            background-color: #9ca3af;
+            background-color: #9ca3af; /* bg-gray-400 */
+        }
+        /* Style for scroll-to-top button visibility */
+        #scrollToTopBtn {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
     </style>
 </head>
@@ -29,39 +33,42 @@
         <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
 
             <!-- Header Section -->
-            <div class="text-center mb-8">
+            <div class="text-center mb-6">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png/960px-Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png" alt="Logo Kementerian Kehutanan" class="h-20 w-auto mx-auto mb-4">
-                <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Arsip Surat Masuk dan Keluar</h1>
-                <p class="mt-2 text-gray-600">katalog pencarian surat masuk & keluar BPHL WIlayah I</p>
-            </div>
-
-            <!-- Search Section -->
-            <div class="relative mb-6">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari berdasarkan kata kunci...">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Arsip Digital BPHL Wilayah I</h1>
+                <p class="mt-2 text-gray-600">katalog pencarian surat dan dokumen BPHL WIlayah I</p>
             </div>
             
+            <div class="relative mb-6">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                </div>
+                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk & Keluar...">
+            </div>
+
             <div class="text-center mb-8">
                 <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Lihat Semua Dokumen</button>
             </div>
-
-            <!-- Status and Catalog Container -->
+            
             <div id="statusMessage" class="text-center text-gray-600 my-10"></div>
-            <div id="catalogContainer" class="border border-gray-200 rounded-lg overflow-hidden">
-                <!-- Catalog items will be inserted here -->
-            </div>
-        </div>
+            <div id="catalogContainer" class="border border-gray-200 rounded-lg overflow-hidden"></div>
 
+        </div>
+        
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.1.1</p>
+            <p class="font-mono">V.1.3.0</p>
         </footer>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" class="hidden fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
 
     <script>
         let allDocuments = [];
@@ -70,6 +77,8 @@
         const catalogContainer = document.getElementById('catalogContainer');
         const statusMessage = document.getElementById('statusMessage');
         const showAllButton = document.getElementById('showAllButton');
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        const originalPlaceholder = searchInput.placeholder;
         const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp6y1xgvTxXBa5oglGjKWrq7Dj5tlr2lskVIEpnkKPOYSVwBdjBRoR925pRDB9Dw/pub?gid=1288387476&single=true&output=csv';
 
         function robustParseCSV(csvText) {
@@ -187,14 +196,18 @@
                 if (!response.ok) throw new Error(`Network response was not ok`);
                 
                 const csvText = await response.text();
-                allDocuments = robustParseCSV(csvText);
-                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di bawah.';
+                const allParsedData = robustParseCSV(csvText);
+                
+                // Filter data to only include valid Google Drive links
+                allDocuments = allParsedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
+
+                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di atas.';
             } catch (error) {
                 console.error('Gagal mengambil atau mem-parsing data:', error);
                 statusMessage.innerHTML = `<p class="text-red-600">Gagal memuat data. Coba muat ulang halaman.</p>`;
             } finally {
                 searchInput.disabled = false;
-                searchInput.placeholder = 'Cari berdasarkan kata kunci...';
+                searchInput.placeholder = originalPlaceholder;
                 showAllButton.disabled = false;
                 showAllButton.textContent = 'Lihat Semua Dokumen';
             }
@@ -205,7 +218,7 @@
             
             if (!searchTerm) {
                 renderCatalog([]);
-                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di bawah.';
+                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di atas.';
                 return;
             }
 
@@ -231,13 +244,29 @@
             renderCatalog(filteredDocuments);
         }
 
+        // --- Event Listeners ---
         searchInput.addEventListener('input', handleSearch);
         showAllButton.addEventListener('click', () => {
             renderCatalog(allDocuments);
         });
-
+        
         window.addEventListener('load', fetchAndDisplayData);
+
+        // --- Scroll to Top Logic ---
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.classList.remove('hidden');
+            } else {
+                scrollToTopBtn.classList.add('hidden');
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     </script>
 </body>
 </html>
-
