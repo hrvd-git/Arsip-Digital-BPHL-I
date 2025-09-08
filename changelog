@@ -1,4 +1,9 @@
 Changelog Aplikasi Arsip Digital BPHL Wilayah I
+Dokumen ini mencatat semua perubahan dan penambahan fitur pada aplikasi dari waktu ke waktu.
+Versi 2 (Update Kritis)
+V.2.0.3 - (08 September 2025)
+Perbaikan Minor:
+Memperbaiki arah animasi "muat ulang" agar berputar berlawanan arah jarum jam untuk pengalaman visual yang lebih baik.
 V.2.0.2 - (08 September 2025)
 Perbaikan Minor:
 Memperbaiki perilaku scroll agar halaman tetap di posisi atas setelah pemuatan data awal atau saat melakukan pencarian. Halaman hanya akan scroll otomatis saat pengguna mengklik tombol navigasi halaman.
