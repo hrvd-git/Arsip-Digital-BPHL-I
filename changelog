@@ -1,5 +1,7 @@
 Changelog Aplikasi Arsip Digital BPHL Wilayah I
-Versi 2
+V.2.0.2 - (08 September 2025)
+Perbaikan Minor:
+Memperbaiki perilaku scroll agar halaman tetap di posisi atas setelah pemuatan data awal atau saat melakukan pencarian. Halaman hanya akan scroll otomatis saat pengguna mengklik tombol navigasi halaman.
 V.2.0.1 - (08 September 2025)
 Perbaikan Minor:
 Ikon "muat ulang" diubah menjadi ikon panah melingkar yang lebih intuitif.
