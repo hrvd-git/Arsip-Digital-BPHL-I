@@ -1,0 +1,49 @@
+Changelog Aplikasi Arsip Digital BPHL Wilayah I
+Versi 2
+V.2.0.1 - (08 September 2025)
+Perbaikan Minor:
+Ikon "muat ulang" diubah menjadi ikon panah melingkar yang lebih intuitif.
+Menambahkan animasi berputar pada ikon saat proses muat ulang data dari server sedang berjalan.
+Menghapus bingkai tombol "muat ulang" agar terlihat lebih minimalis (hanya ikon).
+V.2.0.0 - (08 September 2025)
+Fitur Major:
+Implementasi sistem cache menggunakan localStorage untuk mempercepat waktu muat aplikasi secara drastis pada kunjungan berulang.
+Cache diatur untuk kedaluwarsa secara otomatis setiap 4 jam.
+Penambahan tombol muat ulang data manual untuk mengambil data terbaru dari server tanpa harus menunggu cache kedaluwarsa.
+Penambahan indikator waktu untuk menunjukkan kapan data terakhir kali diperbarui.
+Versi 1
+V.1.6.0 - (08 September 2025)
+Fitur Major:
+Peningkatan desain dan fungsionalitas pagination (penomoran halaman).
+Menambahkan tombol "Previous" (<) dan "Next" (>) untuk navigasi cepat.
+Implementasi penyingkatan halaman otomatis (...) jika jumlah halaman terlalu banyak, membuat tampilan lebih rapi.
+V.1.5.0 - (08 September 2025)
+Fitur Major:
+Implementasi sistem pagination untuk membatasi hasil pencarian menjadi 15 item per halaman.
+V.1.4.1 - (08 September 2025)
+Perbaikan Minor:
+Penambahan pesan error yang lebih spesifik jika database gagal dimuat.
+V.1.4.0 - (08 September 2025)
+Fitur Major:
+Penambahan dropdown filter berdasarkan tahun di sebelah bilah pencarian.
+Filter secara otomatis terisi dengan daftar tahun yang ada di dalam data.
+Filter diatur ke tahun terkini sebagai default.
+V.1.3.1 - (08 September 2025)
+Perbaikan Minor:
+Pembaruan tautan database Google Sheet ke sheet yang berbeda.
+V.1.3.0 - (08 September 2025)
+Fitur Major:
+Penambahan tombol "Kembali ke Atas" di pojok kanan bawah halaman.
+V.1.2.1 - (08 September 2025)
+Perbaikan Minor:
+Pembaruan tautan database Google Sheet.
+V.1.2.0 - (08 September 2025)
+Fitur Major:
+Penambahan fitur filter data otomatis, yang hanya akan menampilkan baris data dengan link_surat yang valid (diawali dengan https://drive.google.com).
+V.1.1.0 - (08 September 2025)
+Fitur Major:
+Penambahan footer dengan informasi tim dan versi aplikasi.
+V.1.0.0 - (08 September 2025)
+Rilis Awal:
+Aplikasi awal dengan satu bidang pencarian, tampilan daftar, dan detail dropdown.
+
