@@ -30,6 +30,13 @@
             color: white;
             border-color: #2563eb; /* border-blue-600 */
         }
+        @keyframes spin-reverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        .animate-spin-reverse {
+            animation: spin-reverse 1s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -86,7 +93,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.2.0.1</p>
+            <p class="font-mono">V.2.0.3</p>
         </footer>
     </div>
 
@@ -240,7 +247,7 @@
                 btn.disabled = disabled;
                 btn.classList.add('pagination-btn', 'px-3', 'py-1', 'border', 'rounded-md', 'text-sm', 'font-medium', 'hover:bg-gray-100', 'transition');
                 if (!disabled) {
-                    btn.addEventListener('click', () => { currentPage = pageNum; displayPage(); });
+                    btn.addEventListener('click', () => { currentPage = pageNum; displayPage(true); });
                 }
                 return btn;
             };
@@ -296,13 +303,19 @@
             renderAdvancedPagination(pageCount);
         }
 
-        function displayPage() {
+        function displayPage(scroll = false) {
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedItems = currentFilteredDocuments.slice(startIndex, endIndex);
+            
             renderCatalog(paginatedItems);
             setupPagination();
-            window.scrollTo(0, catalogContainer.offsetTop - 20);
+            if (scroll) {
+                window.scrollTo({
+                    top: catalogContainer.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
         }
 
         function updateLastUpdatedStatus(timestamp) {
@@ -336,7 +349,7 @@
             yearFilter.disabled = true;
             showAllButton.disabled = true;
             refreshDataButton.disabled = true;
-            refreshIcon.classList.add('animate-spin');
+            refreshIcon.classList.add('animate-spin-reverse');
             searchInput.placeholder = 'Mohon tunggu...';
             showAllButton.textContent = 'Memuat...';
 
@@ -366,7 +379,7 @@
                 console.error('Gagal mengambil atau mem-parsing data:', error);
                 statusMessage.innerHTML = `<p class="text-red-600 font-semibold">Gagal memuat database. Periksa kembali koneksi internet dan pastikan tautan spreadsheet sudah benar.</p>`;
             } finally {
-                 refreshIcon.classList.remove('animate-spin');
+                 refreshIcon.classList.remove('animate-spin-reverse');
             }
         }
         
@@ -459,3 +472,4 @@
     </script>
 </body>
 </html>
+
