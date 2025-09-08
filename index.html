@@ -19,8 +19,8 @@
         }
         button:disabled {
             cursor: not-allowed;
-            background-color: #e5e7eb; /* bg-gray-200 */
-            color: #9ca3af; /* text-gray-400 */
+            /* background-color: #e5e7eb;  bg-gray-200 */
+            /* color: #9ca3af;  text-gray-400 */
         }
         #scrollToTopBtn {
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -61,7 +61,15 @@
 
 
             <div class="text-center mb-8">
-                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua Dokumen</button>
+                <div class="flex justify-center items-center gap-3">
+                    <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua Dokumen</button>
+                    <button id="refreshDataButton" title="Paksa muat ulang data dari server" class="p-2 text-gray-500 hover:text-blue-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="lastUpdatedStatus" class="text-center text-xs text-gray-500 mt-2"></div>
             </div>
             
             <div id="statusMessage" class="text-center text-gray-600 my-10"></div>
@@ -78,7 +86,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.1.6.0</p>
+            <p class="font-mono">V.2.0.1</p>
         </footer>
     </div>
 
@@ -96,10 +104,18 @@
         let currentPage = 1;
         const itemsPerPage = 15;
 
+        // --- Cache Settings ---
+        const CACHE_KEY = 'archiveDataCache';
+        const TIMESTAMP_KEY = 'archiveDataTimestamp';
+        const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+
         const searchInput = document.getElementById('searchInput');
         const catalogContainer = document.getElementById('catalogContainer');
         const statusMessage = document.getElementById('statusMessage');
         const showAllButton = document.getElementById('showAllButton');
+        const refreshDataButton = document.getElementById('refreshDataButton');
+        const refreshIcon = document.getElementById('refreshIcon');
+        const lastUpdatedStatus = document.getElementById('lastUpdatedStatus');
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
         const yearFilter = document.getElementById('yearFilter');
         const paginationContainer = document.getElementById('paginationContainer');
@@ -110,62 +126,49 @@
         function robustParseCSV(csvText) {
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) return [];
-
             const headers = lines.shift().trim().split(',').map(h => h.trim().replace(/"/g, ''));
-            
             const records = [];
             for (const line of lines) {
                 if (!line.trim()) continue;
-
                 let values = [];
                 let currentVal = '';
                 let inQuotes = false;
-
                 for (let i = 0; i < line.length; i++) {
                     const char = line[i];
-
                     if (char === '"') {
                         if (inQuotes && line[i+1] === '"') { 
-                            currentVal += '"';
-                            i++;
-                        } else {
-                            inQuotes = !inQuotes;
-                        }
+                            currentVal += '"'; i++;
+                        } else { inQuotes = !inQuotes; }
                     } else if (char === ',' && !inQuotes) {
                         values.push(currentVal.trim().replace(/\r/g, ''));
                         currentVal = '';
-                    } else {
-                        currentVal += char;
-                    }
+                    } else { currentVal += char; }
                 }
                 values.push(currentVal.trim().replace(/\r/g, ''));
-
                 const obj = {};
-                headers.forEach((header, index) => {
-                    obj[header] = values[index] || '';
-                });
+                headers.forEach((header, index) => { obj[header] = values[index] || ''; });
                 records.push(obj);
             }
             return records;
         }
         
         function populateYearFilter() {
+            while (yearFilter.options.length > 1) {
+                yearFilter.remove(1);
+            }
             const years = [...new Set(allDocuments.map(doc => {
                 const dateStr = doc.tgl_surat || '';
                 const parts = dateStr.split(' ');
                 const yearCandidate = parts[parts.length - 1];
                 return /^\d{4}$/.test(yearCandidate) ? yearCandidate : null;
             }))].filter(Boolean);
-
             years.sort((a, b) => b - a);
-
             years.forEach(year => {
                 const option = document.createElement('option');
                 option.value = year;
                 option.textContent = year;
                 yearFilter.appendChild(option);
             });
-            
             const currentYear = new Date().getFullYear().toString();
             if (years.includes(currentYear)) {
                 yearFilter.value = currentYear;
@@ -174,9 +177,7 @@
 
         function renderCatalog(documentsOnPage) {
             catalogContainer.innerHTML = '';
-            
             const startIndex = (currentPage - 1) * itemsPerPage;
-
             documentsOnPage.forEach((doc, index) => {
                 const actualIndex = startIndex + index;
                 const itemHTML = `
@@ -237,12 +238,9 @@
                 const btn = document.createElement('button');
                 btn.innerHTML = text;
                 btn.disabled = disabled;
-                btn.classList.add('pagination-btn', 'px-4', 'py-2', 'border', 'rounded-md', 'text-sm', 'font-medium', 'hover:bg-gray-100', 'transition');
+                btn.classList.add('pagination-btn', 'px-3', 'py-1', 'border', 'rounded-md', 'text-sm', 'font-medium', 'hover:bg-gray-100', 'transition');
                 if (!disabled) {
-                    btn.addEventListener('click', () => {
-                        currentPage = pageNum;
-                        displayPage();
-                    });
+                    btn.addEventListener('click', () => { currentPage = pageNum; displayPage(); });
                 }
                 return btn;
             };
@@ -250,34 +248,24 @@
             const createEllipsis = () => {
                 const span = document.createElement('span');
                 span.textContent = '...';
-                span.classList.add('px-4', 'py-2', 'text-sm');
+                span.classList.add('px-3', 'py-1', 'text-sm');
                 return span;
             };
 
-            // Previous Button
             const prevButton = createButton('&lt;', currentPage - 1, currentPage === 1);
             paginationContainer.appendChild(prevButton);
 
-            // Page Number Buttons
             const pagesToShow = [];
             if (pageCount <= 7) {
                 for (let i = 1; i <= pageCount; i++) pagesToShow.push(i);
             } else {
                 pagesToShow.push(1);
                 if (currentPage > 3) pagesToShow.push('...');
-                
                 let start = Math.max(2, currentPage - 1);
                 let end = Math.min(pageCount - 1, currentPage + 1);
-
-                if (currentPage <= 3) {
-                    start = 2; end = 4;
-                }
-                if (currentPage >= pageCount - 2) {
-                    start = pageCount - 3; end = pageCount - 1;
-                }
-
+                if (currentPage <= 3) { start = 2; end = 4; }
+                if (currentPage >= pageCount - 2) { start = pageCount - 3; end = pageCount - 1; }
                 for (let i = start; i <= end; i++) pagesToShow.push(i);
-
                 if (currentPage < pageCount - 2) pagesToShow.push('...');
                 pagesToShow.push(pageCount);
             }
@@ -292,8 +280,6 @@
                 }
             });
 
-
-            // Next Button
             const nextButton = createButton('&gt;', currentPage + 1, currentPage === pageCount);
             paginationContainer.appendChild(nextButton);
         }
@@ -301,14 +287,12 @@
         function setupPagination() {
             paginationStatus.innerHTML = '';
             const pageCount = Math.ceil(currentFilteredDocuments.length / itemsPerPage);
-
             if (currentFilteredDocuments.length > 0) {
                 const totalResults = currentFilteredDocuments.length;
                 const startItem = (currentPage - 1) * itemsPerPage + 1;
                 const endItem = Math.min(startItem + itemsPerPage - 1, totalResults);
                 paginationStatus.textContent = `Menampilkan ${startItem}-${endItem} dari ${totalResults} hasil.`;
             }
-            
             renderAdvancedPagination(pageCount);
         }
 
@@ -316,18 +300,44 @@
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedItems = currentFilteredDocuments.slice(startIndex, endIndex);
-            
             renderCatalog(paginatedItems);
             setupPagination();
             window.scrollTo(0, catalogContainer.offsetTop - 20);
         }
 
-        async function fetchAndDisplayData() {
-            statusMessage.textContent = 'Memuat data...';
+        function updateLastUpdatedStatus(timestamp) {
+            if (!timestamp) {
+                lastUpdatedStatus.textContent = '';
+                return;
+            }
+            const date = new Date(parseInt(timestamp));
+            const formattedTime = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const formattedDate = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+            lastUpdatedStatus.textContent = `Data terakhir diperbarui: ${formattedDate}, pukul ${formattedTime}`;
+        }
+
+        function processData(data) {
+            allDocuments = data;
+            populateYearFilter();
+            handleSearch(); // Initial render
+            
+            // Enable UI
+            searchInput.disabled = false;
+            yearFilter.disabled = false;
+            showAllButton.disabled = false;
+            refreshDataButton.disabled = false;
+            searchInput.placeholder = originalPlaceholder;
+            showAllButton.textContent = 'Tampilkan Semua Dokumen';
+        }
+
+        async function fetchDataFromServer(isForced = false) {
+            statusMessage.textContent = isForced ? 'Memuat ulang data terbaru...' : 'Memuat data...';
             searchInput.disabled = true;
             yearFilter.disabled = true;
-            searchInput.placeholder = 'Mohon tunggu...';
             showAllButton.disabled = true;
+            refreshDataButton.disabled = true;
+            refreshIcon.classList.add('animate-spin');
+            searchInput.placeholder = 'Mohon tunggu...';
             showAllButton.textContent = 'Memuat...';
 
             try {
@@ -338,29 +348,49 @@
                 const csvText = await response.text();
                 const allParsedData = robustParseCSV(csvText);
                 
-                allDocuments = allParsedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
+                const newData = allParsedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
+                
+                localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+                const newTimestamp = Date.now();
+                localStorage.setItem(TIMESTAMP_KEY, newTimestamp);
 
-                populateYearFilter();
-                handleSearch();
+                if (isForced) {
+                    statusMessage.innerHTML = `<p class="text-green-600 font-semibold">Data berhasil diperbarui.</p>`;
+                    setTimeout(() => { statusMessage.innerHTML = ''; }, 3000);
+                }
+
+                processData(newData);
+                updateLastUpdatedStatus(newTimestamp);
 
             } catch (error) {
                 console.error('Gagal mengambil atau mem-parsing data:', error);
                 statusMessage.innerHTML = `<p class="text-red-600 font-semibold">Gagal memuat database. Periksa kembali koneksi internet dan pastikan tautan spreadsheet sudah benar.</p>`;
             } finally {
-                searchInput.disabled = false;
-                yearFilter.disabled = false;
-                searchInput.placeholder = originalPlaceholder;
-                showAllButton.disabled = false;
-                showAllButton.textContent = 'Tampilkan Semua Dokumen';
+                 refreshIcon.classList.remove('animate-spin');
             }
         }
+        
+        async function initializeApp() {
+            const cachedTimestamp = localStorage.getItem(TIMESTAMP_KEY);
+            const cachedData = localStorage.getItem(CACHE_KEY);
+
+            if (cachedData && cachedTimestamp && (Date.now() - cachedTimestamp < CACHE_DURATION)) {
+                console.log("Memuat data dari cache.");
+                statusMessage.textContent = "Memuat data dari cache...";
+                processData(JSON.parse(cachedData));
+                updateLastUpdatedStatus(cachedTimestamp);
+            } else {
+                console.log("Cache usang atau kosong. Mengambil dari server.");
+                await fetchDataFromServer(false);
+            }
+        }
+
 
         function handleSearch() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedYear = yearFilter.value;
             
             let filtered = allDocuments;
-
             if (selectedYear) {
                 filtered = filtered.filter(doc => (doc.tgl_surat || '').includes(selectedYear));
             }
@@ -390,7 +420,7 @@
             currentPage = 1;
             
             if (currentFilteredDocuments.length > 0) {
-                 statusMessage.textContent = '';
+                 if (statusMessage.textContent !== '') statusMessage.textContent = '';
             } else {
                 statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
             }
@@ -401,6 +431,7 @@
         // --- Event Listeners ---
         searchInput.addEventListener('input', handleSearch);
         yearFilter.addEventListener('change', handleSearch);
+        refreshDataButton.addEventListener('click', () => fetchDataFromServer(true));
 
         showAllButton.addEventListener('click', () => {
             searchInput.value = '';
@@ -408,7 +439,7 @@
             handleSearch();
         });
         
-        window.addEventListener('load', fetchAndDisplayData);
+        window.addEventListener('load', initializeApp);
 
         // --- Scroll to Top Logic ---
         window.addEventListener('scroll', () => {
@@ -428,4 +459,3 @@
     </script>
 </body>
 </html>
-
