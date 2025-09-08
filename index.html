@@ -19,11 +19,16 @@
         }
         button:disabled {
             cursor: not-allowed;
-            background-color: #9ca3af; /* bg-gray-400 */
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #9ca3af; /* text-gray-400 */
         }
-        /* Style for scroll-to-top button visibility */
         #scrollToTopBtn {
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .pagination-btn.active {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+            border-color: #2563eb; /* border-blue-600 */
         }
     </style>
 </head>
@@ -39,26 +44,41 @@
                 <p class="mt-2 text-gray-600">katalog pencarian surat dan dokumen BPHL WIlayah I</p>
             </div>
             
-            <div class="relative mb-6">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+            <!-- Search and Filter Section -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <div class="relative flex-grow">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk & Keluar...">
                 </div>
-                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk & Keluar...">
+                <div class="flex-shrink-0">
+                    <select id="yearFilter" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
+                        <option value="">Semua Tahun</option>
+                    </select>
+                </div>
             </div>
 
+
             <div class="text-center mb-8">
-                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Lihat Semua Dokumen</button>
+                <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua Dokumen</button>
             </div>
             
             <div id="statusMessage" class="text-center text-gray-600 my-10"></div>
             <div id="catalogContainer" class="border border-gray-200 rounded-lg overflow-hidden"></div>
+            
+            <!-- Pagination Section -->
+            <div id="paginationControls" class="mt-6">
+                <div id="paginationStatus" class="text-center text-sm text-gray-600 mb-4"></div>
+                <div id="paginationContainer" class="flex justify-center items-center flex-wrap gap-2"></div>
+            </div>
 
         </div>
         
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.1.3.0</p>
+            <p class="font-mono">V.1.6.0</p>
         </footer>
     </div>
 
@@ -72,12 +92,18 @@
 
     <script>
         let allDocuments = [];
+        let currentFilteredDocuments = [];
+        let currentPage = 1;
+        const itemsPerPage = 15;
 
         const searchInput = document.getElementById('searchInput');
         const catalogContainer = document.getElementById('catalogContainer');
         const statusMessage = document.getElementById('statusMessage');
         const showAllButton = document.getElementById('showAllButton');
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        const yearFilter = document.getElementById('yearFilter');
+        const paginationContainer = document.getElementById('paginationContainer');
+        const paginationStatus = document.getElementById('paginationStatus');
         const originalPlaceholder = searchInput.placeholder;
         const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp6y1xgvTxXBa5oglGjKWrq7Dj5tlr2lskVIEpnkKPOYSVwBdjBRoR925pRDB9Dw/pub?gid=1813856540&single=true&output=csv';
 
@@ -122,20 +148,40 @@
             }
             return records;
         }
+        
+        function populateYearFilter() {
+            const years = [...new Set(allDocuments.map(doc => {
+                const dateStr = doc.tgl_surat || '';
+                const parts = dateStr.split(' ');
+                const yearCandidate = parts[parts.length - 1];
+                return /^\d{4}$/.test(yearCandidate) ? yearCandidate : null;
+            }))].filter(Boolean);
 
-        function renderCatalog(documents) {
-            catalogContainer.innerHTML = '';
-            statusMessage.textContent = '';
+            years.sort((a, b) => b - a);
 
-            if (documents.length === 0 && searchInput.value) {
-                statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
-                return;
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+            
+            const currentYear = new Date().getFullYear().toString();
+            if (years.includes(currentYear)) {
+                yearFilter.value = currentYear;
             }
+        }
 
-            documents.forEach((doc, index) => {
+        function renderCatalog(documentsOnPage) {
+            catalogContainer.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+
+            documentsOnPage.forEach((doc, index) => {
+                const actualIndex = startIndex + index;
                 const itemHTML = `
                     <div class="border-b border-gray-200 last:border-b-0">
-                        <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="toggleDetails(${index})">
+                        <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition cursor-pointer" onclick="toggleDetails(${actualIndex})">
                             <div class="flex-grow">
                                 <div class="flex flex-wrap items-center gap-x-3 mb-2">
                                     <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-1 rounded-full">${doc.tgl_surat || 'Tanpa Tanggal'}</span>
@@ -149,7 +195,7 @@
                                 <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Buka Tautan</a>
                             </div>
                         </div>
-                        <div id="details-${index}" class="details-content">
+                        <div id="details-${actualIndex}" class="details-content">
                             <div class="p-5 border-t border-gray-200">
                                 <h4 class="font-bold text-lg mb-3 text-gray-800">Informasi Lengkap</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -182,10 +228,104 @@
                 }
             }
         }
+        
+        function renderAdvancedPagination(pageCount) {
+            paginationContainer.innerHTML = '';
+            if (pageCount <= 1) return;
+
+            const createButton = (text, pageNum, disabled = false) => {
+                const btn = document.createElement('button');
+                btn.innerHTML = text;
+                btn.disabled = disabled;
+                btn.classList.add('pagination-btn', 'px-4', 'py-2', 'border', 'rounded-md', 'text-sm', 'font-medium', 'hover:bg-gray-100', 'transition');
+                if (!disabled) {
+                    btn.addEventListener('click', () => {
+                        currentPage = pageNum;
+                        displayPage();
+                    });
+                }
+                return btn;
+            };
+
+            const createEllipsis = () => {
+                const span = document.createElement('span');
+                span.textContent = '...';
+                span.classList.add('px-4', 'py-2', 'text-sm');
+                return span;
+            };
+
+            // Previous Button
+            const prevButton = createButton('&lt;', currentPage - 1, currentPage === 1);
+            paginationContainer.appendChild(prevButton);
+
+            // Page Number Buttons
+            const pagesToShow = [];
+            if (pageCount <= 7) {
+                for (let i = 1; i <= pageCount; i++) pagesToShow.push(i);
+            } else {
+                pagesToShow.push(1);
+                if (currentPage > 3) pagesToShow.push('...');
+                
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(pageCount - 1, currentPage + 1);
+
+                if (currentPage <= 3) {
+                    start = 2; end = 4;
+                }
+                if (currentPage >= pageCount - 2) {
+                    start = pageCount - 3; end = pageCount - 1;
+                }
+
+                for (let i = start; i <= end; i++) pagesToShow.push(i);
+
+                if (currentPage < pageCount - 2) pagesToShow.push('...');
+                pagesToShow.push(pageCount);
+            }
+
+            pagesToShow.forEach(item => {
+                if (item === '...') {
+                    paginationContainer.appendChild(createEllipsis());
+                } else {
+                    const btn = createButton(item, item);
+                    if (item === currentPage) btn.classList.add('active');
+                    paginationContainer.appendChild(btn);
+                }
+            });
+
+
+            // Next Button
+            const nextButton = createButton('&gt;', currentPage + 1, currentPage === pageCount);
+            paginationContainer.appendChild(nextButton);
+        }
+
+        function setupPagination() {
+            paginationStatus.innerHTML = '';
+            const pageCount = Math.ceil(currentFilteredDocuments.length / itemsPerPage);
+
+            if (currentFilteredDocuments.length > 0) {
+                const totalResults = currentFilteredDocuments.length;
+                const startItem = (currentPage - 1) * itemsPerPage + 1;
+                const endItem = Math.min(startItem + itemsPerPage - 1, totalResults);
+                paginationStatus.textContent = `Menampilkan ${startItem}-${endItem} dari ${totalResults} hasil.`;
+            }
+            
+            renderAdvancedPagination(pageCount);
+        }
+
+        function displayPage() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = currentFilteredDocuments.slice(startIndex, endIndex);
+            
+            renderCatalog(paginatedItems);
+            setupPagination();
+            window.scrollTo(0, catalogContainer.offsetTop - 20);
+        }
 
         async function fetchAndDisplayData() {
             statusMessage.textContent = 'Memuat data...';
             searchInput.disabled = true;
+            yearFilter.disabled = true;
             searchInput.placeholder = 'Mohon tunggu...';
             showAllButton.disabled = true;
             showAllButton.textContent = 'Memuat...';
@@ -198,56 +338,74 @@
                 const csvText = await response.text();
                 const allParsedData = robustParseCSV(csvText);
                 
-                // Filter data to only include valid Google Drive links
                 allDocuments = allParsedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
 
-                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di atas.';
+                populateYearFilter();
+                handleSearch();
+
             } catch (error) {
                 console.error('Gagal mengambil atau mem-parsing data:', error);
-                statusMessage.innerHTML = `<p class="text-red-600">Gagal memuat data. Coba muat ulang halaman.</p>`;
+                statusMessage.innerHTML = `<p class="text-red-600 font-semibold">Gagal memuat database. Periksa kembali koneksi internet dan pastikan tautan spreadsheet sudah benar.</p>`;
             } finally {
                 searchInput.disabled = false;
+                yearFilter.disabled = false;
                 searchInput.placeholder = originalPlaceholder;
                 showAllButton.disabled = false;
-                showAllButton.textContent = 'Lihat Semua Dokumen';
+                showAllButton.textContent = 'Tampilkan Semua Dokumen';
             }
         }
 
         function handleSearch() {
             const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedYear = yearFilter.value;
             
-            if (!searchTerm) {
-                renderCatalog([]);
-                statusMessage.textContent = 'Ketik untuk mencari, atau klik tombol di atas.';
-                return;
+            let filtered = allDocuments;
+
+            if (selectedYear) {
+                filtered = filtered.filter(doc => (doc.tgl_surat || '').includes(selectedYear));
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(doc => {
+                    const isYearSearch = /^\d{4}$/.test(searchTerm);
+                    if (isYearSearch) {
+                        const lowerCaseDate = String(doc.tgl_surat).toLowerCase();
+                        const dateWords = lowerCaseDate.replace(/,/g, '').split(/\s+/);
+                        return dateWords.includes(searchTerm);
+                    }
+                    return Object.entries(doc).some(([key, value]) => {
+                        if (key === 'link_surat') return false;
+                        const lowerCaseValue = String(value).toLowerCase();
+                        if (key === 'tgl_surat') {
+                            const dateWords = lowerCaseValue.replace(/,/g, '').split(/\s+/);
+                            const searchWords = searchTerm.split(/\s+/);
+                            return searchWords.every(word => dateWords.includes(word));
+                        }
+                        return lowerCaseValue.includes(searchTerm);
+                    });
+                });
+            }
+            
+            currentFilteredDocuments = filtered;
+            currentPage = 1;
+            
+            if (currentFilteredDocuments.length > 0) {
+                 statusMessage.textContent = '';
+            } else {
+                statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
             }
 
-            const filteredDocuments = allDocuments.filter(doc => {
-                const isYearSearch = /^\d{4}$/.test(searchTerm);
-                if (isYearSearch) {
-                    const lowerCaseDate = String(doc.tgl_surat).toLowerCase();
-                    const dateWords = lowerCaseDate.replace(/,/g, '').split(/\s+/);
-                    return dateWords.includes(searchTerm);
-                }
-                return Object.entries(doc).some(([key, value]) => {
-                    if (key === 'link_surat') return false;
-                    const lowerCaseValue = String(value).toLowerCase();
-                    if (key === 'tgl_surat') {
-                        const dateWords = lowerCaseValue.replace(/,/g, '').split(/\s+/);
-                        const searchWords = searchTerm.split(/\s+/);
-                        return searchWords.every(word => dateWords.includes(word));
-                    }
-                    return lowerCaseValue.includes(searchTerm);
-                });
-            });
-
-            renderCatalog(filteredDocuments);
+            displayPage();
         }
 
         // --- Event Listeners ---
         searchInput.addEventListener('input', handleSearch);
+        yearFilter.addEventListener('change', handleSearch);
+
         showAllButton.addEventListener('click', () => {
-            renderCatalog(allDocuments);
+            searchInput.value = '';
+            yearFilter.value = '';
+            handleSearch();
         });
         
         window.addEventListener('load', fetchAndDisplayData);
