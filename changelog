@@ -1,6 +1,49 @@
 Changelog Aplikasi Arsip Digital BPHL Wilayah I
 
-Versi 2
+Dokumen ini mencatat semua perubahan dan penambahan fitur pada aplikasi dari waktu ke waktu.
+Versi 2 (Update Kritis)
+V.2.6.1 - (14 September 2025)
+
+    Perbaikan Bug Kritis:
+
+        Memperbaiki masalah di mana hasil pencarian "fuzzy search" terasa tidak teratur.
+
+        Logika diubah: filter diterapkan terlebih dahulu, baru pencarian fuzzy.
+
+        Hasil pencarian sekarang diurutkan berdasarkan relevansi (jika ada kata kunci) atau tanggal terbaru (jika tidak ada kata kunci), bukan keduanya secara bersamaan.
+
+V.2.6.0 - (14 September 2025)
+
+    Fitur Major:
+
+        Implementasi pencarian dinamis (fuzzy search) untuk mengatasi kesalahan ketik (typo) pada database.
+
+        Pencarian sekarang dapat menemukan kata kunci yang mirip, meskipun tidak sama persis (misal: "setifikasi" akan menemukan "sertifikasi").
+
+V.2.5.2 - (14 September 2025)
+
+    Perbaikan Fungsionalitas:
+
+        Meningkatkan kemampuan filter "Tujuan Naskah" agar menggunakan pencarian parsial (tidak harus sama persis) dan tidak membedakan huruf besar/kecil.
+
+        Mengubah label filter dari "TU" menjadi "Tata Usaha" untuk kejelasan.
+
+V.2.5.1 - (14 September 2025)
+
+    Perbaikan Minor:
+
+        Mengubah teks default pada filter status menjadi "Tujuan Naskah".
+
+        Mengatur filter tahun agar secara default menampilkan "Semua Tahun" saat aplikasi dimuat.
+
+V.2.5.0 - (14 September 2025)
+
+    Fitur Major:
+
+        Penambahan dropdown filter baru di sebelah filter tahun untuk menyaring dokumen berdasarkan status_dokumen.
+
+        Opsi filter yang tersedia adalah P3HPHL, PEPHPHL, dan TU.
+
 V.2.4.1 - (14 September 2025)
 
     Perbaikan Bug Kritis:
