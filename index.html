@@ -93,7 +93,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.2.0.4</p>
+            <p class="font-mono">V.2.4.1</p>
         </footer>
     </div>
 
@@ -112,8 +112,8 @@
         const itemsPerPage = 15;
 
         // --- Cache Settings ---
-        const CACHE_KEY = 'archiveDataCache';
-        const TIMESTAMP_KEY = 'archiveDataTimestamp';
+        const CACHE_KEY = 'archiveDataCache_SheetDB';
+        const TIMESTAMP_KEY = 'archiveDataTimestamp_SheetDB';
         const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
 
         const searchInput = document.getElementById('searchInput');
@@ -128,35 +128,56 @@
         const paginationContainer = document.getElementById('paginationContainer');
         const paginationStatus = document.getElementById('paginationStatus');
         const originalPlaceholder = searchInput.placeholder;
-        const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRS2hsuZqxVK6njOgS7lM0F_BU9FqQ8_0e7VeELaO8-CQw5d8ahPGRKpg3ewnW-GLZpE2rRYkxkfpRD/pub?gid=953817866&single=true&output=csv';
+        const sheetDbUrl = 'https://sheetdb.io/api/v1/ncnlh3ykuogr5';
 
-        function robustParseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            if (lines.length < 2) return [];
-            const headers = lines.shift().trim().split(',').map(h => h.trim().replace(/"/g, ''));
-            const records = [];
-            for (const line of lines) {
-                if (!line.trim()) continue;
-                let values = [];
-                let currentVal = '';
-                let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        if (inQuotes && line[i+1] === '"') { 
-                            currentVal += '"'; i++;
-                        } else { inQuotes = !inQuotes; }
-                    } else if (char === ',' && !inQuotes) {
-                        values.push(currentVal.trim().replace(/\r/g, ''));
-                        currentVal = '';
-                    } else { currentVal += char; }
-                }
-                values.push(currentVal.trim().replace(/\r/g, ''));
-                const obj = {};
-                headers.forEach((header, index) => { obj[header] = values[index] || ''; });
-                records.push(obj);
+        const monthMap = {
+            'januari': 0, 'jan': 0, 'februari': 1, 'feb': 1, 'maret': 2, 'mar': 2, 'april': 3, 'apr': 3,
+            'mei': 4, 'juni': 5, 'jun': 5, 'juli': 6, 'jul': 6, 'agustus': 7, 'agu': 7, 'september': 8,
+            'sep': 8, 'oktober': 9, 'okt': 9, 'november': 10, 'nov': 10, 'desember': 11, 'des': 11
+        };
+
+        function parseRobustDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') {
+                return new Date(0);
             }
-            return records;
+            const cleanStr = dateStr.replace(/,/g, '').toLowerCase();
+
+            const wordParts = cleanStr.split(' ');
+            if (wordParts.length >= 3) {
+                const year = parseInt(wordParts[wordParts.length - 1], 10);
+                const monthName = wordParts.find(p => monthMap[p] !== undefined);
+                const day = parseInt(wordParts.find(p => /^\d{1,2}$/.test(p)), 10);
+                const month = monthMap[monthName];
+                if (!isNaN(day) && !isNaN(year) && month !== undefined) {
+                    return new Date(year, month, day);
+                }
+            }
+            
+            const dateParts = cleanStr.split(/[-/]/);
+            if (dateParts.length === 3) {
+                const part1 = parseInt(dateParts[0], 10);
+                const part2 = parseInt(dateParts[1], 10);
+                const part3 = parseInt(dateParts[2], 10);
+                
+                if(!isNaN(part1) && !isNaN(part2) && !isNaN(part3)) {
+                    if (part1 > 1000) return new Date(part1, part2 - 1, part3);
+                    if (part3 > 1000) return new Date(part3, part2 - 1, part1);
+                }
+            }
+
+            return new Date(0);
+        }
+        
+        function normalizeApiData(data) {
+            return data.map(row => {
+                const newRow = {};
+                for (const key in row) {
+                    // Split at '::' and take the first part, then normalize to snake_case
+                    const newKey = key.split('::')[0].toLowerCase().replace(/ /g, '_');
+                    newRow[newKey] = row[key];
+                }
+                return newRow;
+            });
         }
         
         function populateYearFilter() {
@@ -164,10 +185,8 @@
                 yearFilter.remove(1);
             }
             const years = [...new Set(allDocuments.map(doc => {
-                const dateStr = doc.tgl_surat || '';
-                const parts = dateStr.split(' ');
-                const yearCandidate = parts[parts.length - 1];
-                return /^\d{4}$/.test(yearCandidate) ? yearCandidate : null;
+                const date = parseRobustDate(doc.tgl_surat);
+                return date.getFullYear() > 1970 ? date.getFullYear().toString() : null;
             }))].filter(Boolean);
             years.sort((a, b) => b - a);
             years.forEach(year => {
@@ -214,9 +233,7 @@
                                     <p><strong class="font-medium text-gray-500">Info Arsip:</strong> ${doc.info_arsip || '-'}</p>
                                     <p><strong class="font-medium text-gray-500">Tanggal Surat:</strong> ${doc.tgl_surat || '-'}</p>
                                     <p><strong class="font-medium text-gray-500">Status Dokumen:</strong> ${doc.status_dokumen || '-'}</p>
-                                    <p><strong class="font-medium text-gray-500">Tujuan Surat:</strong> ${doc.tujuan_surat || '-'}</p>
-                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen || '-'}</p>
-                                    <div class="md:col-span-2"><strong class="font-medium text-gray-500">Deskripsi:</strong> ${doc.deskripsi_surat || '-'}</div>
+                                    <p><strong class="font-medium text-gray-500">Tujuan Surat:</strong> ${doc.tujuan_surat || '-'}</div>
                                 </div>
                             </div>
                         </div>
@@ -332,9 +349,8 @@
         function processData(data) {
             allDocuments = data;
             populateYearFilter();
-            handleSearch(); // Initial render
+            handleSearch();
             
-            // Enable UI
             searchInput.disabled = false;
             yearFilter.disabled = false;
             showAllButton.disabled = false;
@@ -354,14 +370,14 @@
             showAllButton.textContent = 'Memuat...';
 
             try {
-                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(sheetURL)}`;
-                const response = await fetch(proxyUrl);
+                const response = await fetch(sheetDbUrl);
                 if (!response.ok) throw new Error(`Network response was not ok`);
                 
-                const csvText = await response.text();
-                const allParsedData = robustParseCSV(csvText);
+                const jsonData = await response.json();
                 
-                const newData = allParsedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
+                const normalizedData = normalizeApiData(jsonData);
+                
+                const newData = normalizedData.filter(doc => doc.link_surat && doc.link_surat.startsWith('https://drive.google.com'));
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
                 const newTimestamp = Date.now();
@@ -377,7 +393,24 @@
 
             } catch (error) {
                 console.error('Gagal mengambil atau mem-parsing data:', error);
-                statusMessage.innerHTML = `<p class="text-red-600 font-semibold">Gagal memuat database. Periksa kembali koneksi internet dan pastikan tautan spreadsheet sudah benar.</p>`;
+                const errorHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg text-left max-w-2xl mx-auto">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.031-1.742 3.031H4.42c-1.532 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 011-1h.008a1 1 0 011 1v3.012a1 1 0 01-1 1h-.008a1 1 0 01-1-1V5z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-bold text-red-800">Gagal Memuat Database</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>Terjadi kesalahan saat mencoba mengambil data. Periksa kembali koneksi internet Anda dan pastikan tautan API sudah benar.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                statusMessage.innerHTML = errorHTML;
             } finally {
                  refreshIcon.classList.remove('animate-spin-reverse');
             }
@@ -410,32 +443,33 @@
             
             if (searchTerm) {
                 filtered = filtered.filter(doc => {
-                    const isYearSearch = /^\d{4}$/.test(searchTerm);
-                    if (isYearSearch) {
-                        const lowerCaseDate = String(doc.tgl_surat).toLowerCase();
-                        const dateWords = lowerCaseDate.replace(/,/g, '').split(/\s+/);
-                        return dateWords.includes(searchTerm);
-                    }
                     return Object.entries(doc).some(([key, value]) => {
                         if (key === 'link_surat') return false;
-                        const lowerCaseValue = String(value).toLowerCase();
-                        if (key === 'tgl_surat') {
-                            const dateWords = lowerCaseValue.replace(/,/g, '').split(/\s+/);
-                            const searchWords = searchTerm.split(/\s+/);
-                            return searchWords.every(word => dateWords.includes(word));
-                        }
-                        return lowerCaseValue.includes(searchTerm);
+                        return String(value).toLowerCase().includes(searchTerm);
                     });
                 });
             }
             
+            filtered.sort((a, b) => {
+                const dateA = parseRobustDate(a.tgl_surat);
+                const dateB = parseRobustDate(b.tgl_surat);
+                return dateB - dateA;
+            });
+
             currentFilteredDocuments = filtered;
             currentPage = 1;
             
-            if (currentFilteredDocuments.length > 0) {
-                 if (statusMessage.textContent !== '') statusMessage.textContent = '';
+            if (currentFilteredDocuments.length === 0) {
+                const hasActiveFilter = searchTerm || selectedYear;
+                if (hasActiveFilter) {
+                    statusMessage.textContent = 'Tidak ada hasil yang ditemukan untuk filter Anda.';
+                } else if (allDocuments.length > 0) {
+                    statusMessage.textContent = '';
+                } else {
+                    statusMessage.textContent = 'Tidak ada dokumen di dalam database.';
+                }
             } else {
-                statusMessage.textContent = 'Tidak ada hasil yang ditemukan.';
+                 statusMessage.innerHTML = ''; // Clear any previous messages
             }
 
             displayPage();
