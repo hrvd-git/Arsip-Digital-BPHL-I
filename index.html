@@ -6,6 +6,7 @@
     <title>Arsip Surat BPHL Wilayah I</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png/960px-Logo_Kementerian_Kehutanan_RI_%282024%29_%28cropped%29.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -60,6 +61,14 @@
                     <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk & Keluar...">
                 </div>
                 <div class="flex-shrink-0">
+                    <select id="statusFilter" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
+                        <option value="">Tujuan Naskah</option>
+                        <option value="P3HPHL">P3HPHL</option>
+                        <option value="PEPHPHL">PEPHPHL</option>
+                        <option value="TU">Tata Usaha</option>
+                    </select>
+                </div>
+                <div class="flex-shrink-0">
                     <select id="yearFilter" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
                         <option value="">Semua Tahun</option>
                     </select>
@@ -93,7 +102,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.2.4.1</p>
+            <p class="font-mono">V.2.6.1</p>
         </footer>
     </div>
 
@@ -125,6 +134,7 @@
         const lastUpdatedStatus = document.getElementById('lastUpdatedStatus');
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
         const yearFilter = document.getElementById('yearFilter');
+        const statusFilter = document.getElementById('statusFilter');
         const paginationContainer = document.getElementById('paginationContainer');
         const paginationStatus = document.getElementById('paginationStatus');
         const originalPlaceholder = searchInput.placeholder;
@@ -172,7 +182,6 @@
             return data.map(row => {
                 const newRow = {};
                 for (const key in row) {
-                    // Split at '::' and take the first part, then normalize to snake_case
                     const newKey = key.split('::')[0].toLowerCase().replace(/ /g, '_');
                     newRow[newKey] = row[key];
                 }
@@ -195,10 +204,7 @@
                 option.textContent = year;
                 yearFilter.appendChild(option);
             });
-            const currentYear = new Date().getFullYear().toString();
-            if (years.includes(currentYear)) {
-                yearFilter.value = currentYear;
-            }
+            yearFilter.value = "";
         }
 
         function renderCatalog(documentsOnPage) {
@@ -348,11 +354,23 @@
 
         function processData(data) {
             allDocuments = data;
+            const fuseOptions = {
+                keys: [
+                    "kode_klasifikasi", "asal_surat", "no_surat", "deskripsi_surat",
+                    "jenis_naskah", "info_arsip", "tgl_surat", "status_dokumen", "tujuan_surat"
+                ],
+                includeScore: false,
+                threshold: 0.4, // 0 = perfect match, 1 = any match
+                ignoreLocation: true
+            };
+            fuse = new Fuse(allDocuments, fuseOptions);
+
             populateYearFilter();
             handleSearch();
             
             searchInput.disabled = false;
             yearFilter.disabled = false;
+            statusFilter.disabled = false;
             showAllButton.disabled = false;
             refreshDataButton.disabled = false;
             searchInput.placeholder = originalPlaceholder;
@@ -363,6 +381,7 @@
             statusMessage.textContent = isForced ? 'Memuat ulang data terbaru...' : 'Memuat data...';
             searchInput.disabled = true;
             yearFilter.disabled = true;
+            statusFilter.disabled = true;
             showAllButton.disabled = true;
             refreshDataButton.disabled = true;
             refreshIcon.classList.add('animate-spin-reverse');
@@ -433,34 +452,48 @@
 
 
         function handleSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
+            const searchTerm = searchInput.value.trim();
             const selectedYear = yearFilter.value;
-            
-            let filtered = allDocuments;
+            const selectedStatus = statusFilter.value;
+
+            let preFilteredData = allDocuments;
+
             if (selectedYear) {
-                filtered = filtered.filter(doc => (doc.tgl_surat || '').includes(selectedYear));
+                preFilteredData = preFilteredData.filter(doc => (doc.tgl_surat || '').includes(selectedYear));
             }
-            
+
+            if (selectedStatus) {
+                preFilteredData = preFilteredData.filter(doc => (doc.status_dokumen || '').toLowerCase().includes(selectedStatus.toLowerCase()));
+            }
+
+            let finalResults;
+
             if (searchTerm) {
-                filtered = filtered.filter(doc => {
-                    return Object.entries(doc).some(([key, value]) => {
-                        if (key === 'link_surat') return false;
-                        return String(value).toLowerCase().includes(searchTerm);
-                    });
+                const fuseOptions = {
+                    keys: [
+                        "kode_klasifikasi", "asal_surat", "no_surat", "deskripsi_surat",
+                        "jenis_naskah", "info_arsip", "tgl_surat", "status_dokumen", "tujuan_surat"
+                    ],
+                    includeScore: false,
+                    threshold: 0.4,
+                    ignoreLocation: true
+                };
+                const localFuse = new Fuse(preFilteredData, fuseOptions);
+                finalResults = localFuse.search(searchTerm).map(result => result.item);
+            } else {
+                finalResults = preFilteredData;
+                finalResults.sort((a, b) => {
+                    const dateA = parseRobustDate(a.tgl_surat);
+                    const dateB = parseRobustDate(b.tgl_surat);
+                    return dateB - dateA;
                 });
             }
-            
-            filtered.sort((a, b) => {
-                const dateA = parseRobustDate(a.tgl_surat);
-                const dateB = parseRobustDate(b.tgl_surat);
-                return dateB - dateA;
-            });
 
-            currentFilteredDocuments = filtered;
+            currentFilteredDocuments = finalResults;
             currentPage = 1;
             
             if (currentFilteredDocuments.length === 0) {
-                const hasActiveFilter = searchTerm || selectedYear;
+                const hasActiveFilter = searchTerm || selectedYear || selectedStatus;
                 if (hasActiveFilter) {
                     statusMessage.textContent = 'Tidak ada hasil yang ditemukan untuk filter Anda.';
                 } else if (allDocuments.length > 0) {
@@ -469,7 +502,7 @@
                     statusMessage.textContent = 'Tidak ada dokumen di dalam database.';
                 }
             } else {
-                 statusMessage.innerHTML = ''; // Clear any previous messages
+                 statusMessage.innerHTML = '';
             }
 
             displayPage();
@@ -478,11 +511,13 @@
         // --- Event Listeners ---
         searchInput.addEventListener('input', handleSearch);
         yearFilter.addEventListener('change', handleSearch);
+        statusFilter.addEventListener('change', handleSearch);
         refreshDataButton.addEventListener('click', () => fetchDataFromServer(true));
 
         showAllButton.addEventListener('click', () => {
             searchInput.value = '';
             yearFilter.value = '';
+            statusFilter.value = '';
             handleSearch();
         });
         
