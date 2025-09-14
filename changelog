@@ -1,59 +1,186 @@
 Changelog Aplikasi Arsip Digital BPHL Wilayah I
-Dokumen ini mencatat semua perubahan dan penambahan fitur pada aplikasi dari waktu ke waktu.
-Versi 2 (Update Kritis)
-V.2.0.4 - (08 September 2025)
-Perbaikan Minor:
-Memperbarui tautan database utama ke sumber Google Sheet yang baru.
-V.2.0.3 - (08 September 2025)
-Perbaikan Minor:
-Memperbaiki arah animasi "muat ulang" agar berputar berlawanan arah jarum jam untuk pengalaman visual yang lebih baik.
-V.2.0.2 - (08 September 2025)
-Perbaikan Minor:
-Memperbaiki perilaku scroll agar halaman tetap di posisi atas setelah pemuatan data awal atau saat melakukan pencarian. Halaman hanya akan scroll otomatis saat pengguna mengklik tombol navigasi halaman.
-V.2.0.1 - (08 September 2025)
-Perbaikan Minor:
-Ikon "muat ulang" diubah menjadi ikon panah melingkar yang lebih intuitif.
-Menambahkan animasi berputar pada ikon saat proses muat ulang data dari server sedang berjalan.
-Menghapus bingkai tombol "muat ulang" agar terlihat lebih minimalis (hanya ikon).
-V.2.0.0 - (08 September 2025)
-Fitur Major:
-Implementasi sistem cache menggunakan localStorage untuk mempercepat waktu muat aplikasi secara drastis pada kunjungan berulang.
-Cache diatur untuk kedaluwarsa secara otomatis setiap 4 jam.
-Penambahan tombol muat ulang data manual untuk mengambil data terbaru dari server tanpa harus menunggu cache kedaluwarsa.
-Penambahan indikator waktu untuk menunjukkan kapan data terakhir kali diperbarui.
-Versi 1
-V.1.6.0 - (08 September 2025)
-Fitur Major:
-Peningkatan desain dan fungsionalitas pagination (penomoran halaman).
-Menambahkan tombol "Previous" (<) dan "Next" (>) untuk navigasi cepat.
-Implementasi penyingkatan halaman otomatis (...) jika jumlah halaman terlalu banyak, membuat tampilan lebih rapi.
-V.1.5.0 - (08 September 2025)
-Fitur Major:
-Implementasi sistem pagination untuk membatasi hasil pencarian menjadi 15 item per halaman.
-V.1.4.1 - (08 September 2025)
-Perbaikan Minor:
-Penambahan pesan error yang lebih spesifik jika database gagal dimuat.
-V.1.4.0 - (08 September 2025)
-Fitur Major:
-Penambahan dropdown filter berdasarkan tahun di sebelah bilah pencarian.
-Filter secara otomatis terisi dengan daftar tahun yang ada di dalam data.
-Filter diatur ke tahun terkini sebagai default.
-V.1.3.1 - (08 September 2025)
-Perbaikan Minor:
-Pembaruan tautan database Google Sheet ke sheet yang berbeda.
-V.1.3.0 - (08 September 2025)
-Fitur Major:
-Penambahan tombol "Kembali ke Atas" di pojok kanan bawah halaman.
-V.1.2.1 - (08 September 2025)
-Perbaikan Minor:
-Pembaruan tautan database Google Sheet.
-V.1.2.0 - (08 September 2025)
-Fitur Major:
-Penambahan fitur filter data otomatis, yang hanya akan menampilkan baris data dengan link_surat yang valid (diawali dengan https://drive.google.com).
-V.1.1.0 - (08 September 2025)
-Fitur Major:
-Penambahan footer dengan informasi tim dan versi aplikasi.
-V.1.0.0 - (08 September 2025)
-Rilis Awal:
-Aplikasi awal dengan satu bidang pencarian, tampilan daftar, dan detail dropdown.
 
+Versi 2
+V.2.4.1 - (14 September 2025)
+
+    Perbaikan Bug Kritis:
+
+        Memperbaiki masalah di mana data tidak muncul saat menggunakan API SheetDB.io.
+
+        Aplikasi sekarang secara otomatis menormalkan nama kolom yang diterima dari API (menghapus sufiks ::[nama_sheet]) untuk memastikan data dapat diproses dengan benar.
+
+V.2.4.0 - (14 September 2025)
+
+    Perubahan Arsitektur & Fitur Major:
+
+        Migrasi Kembali ke API Langsung: Mengganti metode pengambilan data dari CORS Proxy ke koneksi API langsung menggunakan layanan SheetDB.io untuk stabilitas dan performa maksimal.
+
+        Menghapus ketergantungan pada proxy publik secara permanen.
+
+        Aplikasi sekarang kembali memproses data dalam format JSON.
+
+        Menghapus field lokasi_dokumen dari tampilan detail sesuai permintaan.
+
+V.2.3.1 - (14 September 2025)
+
+    Perbaikan Minor:
+
+        Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi masalah "Gagal Memuat Database".
+
+V.2.3.0 - (14 September 2025)
+
+    Perubahan Arsitektur:
+
+        Kembali ke Metode Proxy: Mengembalikan metode pengambilan data dari Google Apps Script ke CORS Proxy untuk menyederhanakan alur kerja dan mengatasi masalah deployment.
+
+        Aplikasi sekarang kembali memproses data dalam format CSV.
+
+        Menggunakan layanan proxy allorigins.win.
+
+V.2.2.5 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Menyediakan panduan deployment ulang yang lebih spesifik untuk mengatasi error persisten pada Google Apps Script.
+
+V.2.2.4 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Menyediakan panduan diagnosis baru (Panduan_Cek_Akses.md) untuk membantu pengguna memverifikasi pengaturan akses publik pada Google Apps Script.
+
+V.2.2.3 - (11 September 2025)
+
+    Perbaikan Kritis:
+
+        Memperbarui URL database ke Google Apps Script yang sudah diperbaiki dan diverifikasi.
+
+        Aplikasi sekarang sepenuhnya terhubung ke sumber data yang stabil dan andal, menghilangkan ketergantungan pada proxy.
+
+V.2.2.2 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Memperbarui file aplikasi dengan tautan Google Apps Script yang benar.
+
+        Menyediakan panduan verifikasi final untuk memastikan pengguna menyalin URL deployment yang aktif.
+
+V.2.2.1 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Mengembalikan penggunaan proxy untuk sementara waktu guna mengatasi NetworkError pada koneksi langsung ke Google Apps Script.
+
+V.2.2.0 - (11 September 2025)
+
+    Fitur Major & Perbaikan Kritis:
+
+        Migrasi dari Proxy ke Google Apps Script: Menghapus ketergantungan pada proxy publik dan mengimplementasikan koneksi langsung ke Google Apps Script untuk pengambilan data yang lebih cepat dan stabil.
+
+        Aplikasi sekarang memproses data dalam format JSON, bukan lagi CSV.
+
+V.2.1.7 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Mengganti layanan proxy ke alternatif lain (allorigins.win) untuk mengatasi NetworkError.
+
+V.2.1.6 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi NetworkError.
+
+V.2.1.5 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Mengganti layanan proxy ke alternatif lain (thingproxy.freeboard.io) untuk mengatasi NetworkError.
+
+V.2.1.4 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Mengganti layanan proxy (codetabs.com) ke alternatif lain untuk mengatasi NetworkError.
+
+V.2.1.3 - (11 September 2025)
+
+    Perbaikan Bug:
+
+        Memperbaiki dan menyederhanakan logika pencarian untuk memastikan semua kata kunci (termasuk tahun) dicari secara konsisten di semua kolom.
+
+V.2.1.2 - (11 September 2025)
+
+    Perbaikan Minor:
+
+        Peningkatan tampilan pesan error saat database gagal dimuat.
+
+V.2.1.1 - (11 September 2025)
+
+    Perbaikan Bug:
+
+        Memperbaiki logika pengurutan tanggal (parseRobustDate) agar dapat mengenali berbagai format tanggal.
+
+V.2.1.0 - (11 September 2025)
+
+    Fitur Major:
+
+        Menambahkan fungsionalitas pengurutan (sorting) otomatis pada hasil pencarian berdasarkan tgl_surat terbaru.
+
+V.2.0.5 - (14 September 2025)
+
+    Perbaikan Bug:
+
+        Mengembalikan metode pengambilan data ke CORS Proxy (kembali ke arsitektur v.2.0.4).
+
+        Memperbarui layanan proxy ke allorigins.win yang lebih stabil untuk mengatasi masalah data tidak muncul.
+
+V.2.0.4 - (08 September 2025)
+
+    Perbaikan Minor:
+
+        Memperbarui tautan database utama ke sumber Google Sheet yang baru.
+
+V.2.0.3 - (08 September 2025)
+
+    Perbaikan Minor:
+
+        Memperbaiki arah animasi "muat ulang".
+
+V.2.0.2 - (08 September 2025)
+
+    Perbaikan Minor:
+
+        Memperbaiki perilaku scroll halaman.
+
+V.2.0.1 - (08 September 2025)
+
+    Perbaikan Minor:
+
+        Ikon "muat ulang" diubah menjadi ikon panah melingkar.
+
+        Menambahkan animasi berputar pada ikon saat proses muat ulang.
+
+V.2.0.0 - (08 September 2025)
+
+    Fitur Major:
+
+        Implementasi sistem cache menggunakan localStorage.
+
+Versi 1
+
+    V.1.6.0 - (08 September 2025): Peningkatan desain pagination.
+
+    V.1.5.0 - (08 September 2025): Implementasi sistem pagination.
+
+    V.1.4.1 - (08 September 2025): Penambahan pesan error database.
+
+    V.1.4.0 - (08 September 2025): Penambahan filter tahun.
+
+    V.1.3.0 - (08 September 2025): Penambahan tombol "Kembali ke Atas".
+
+    V.1.2.0 - (08 September 2025): Penambahan filter data otomatis.
+
+    V.1.1.0 - (08 September 2025): Penambahan footer.
+
+    V.1.0.0 - (08 September 2025): Rilis Awal.
