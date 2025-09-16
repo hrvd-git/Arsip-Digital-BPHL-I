@@ -29,15 +29,15 @@
             color: white;
             border-color: #2563eb;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin-reverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
         }
-        .animate-spin-slow {
-            animation: spin 1.5s linear infinite;
+        .animate-spin-reverse {
+            animation: spin-reverse 1s linear infinite;
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         .tab-button {
             transition: all 0.2s ease-in-out;
             border-bottom: 3px solid transparent;
@@ -54,6 +54,12 @@
         }
         #previewModal.hidden {
             display: none;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 1.5s linear infinite;
         }
     </style>
 </head>
@@ -81,85 +87,75 @@
                 </div>
             </div>
 
-            <!-- Tab 1: Surat Masuk -->
-            <div id="tabContent1" class="tab-content active">
-                <!-- Search and Filter Section -->
-                <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div class="relative flex-grow">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <input type="search" id="searchInput1" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk...">
-                    </div>
-                    <div class="flex-shrink-0">
-                        <select id="statusFilter1" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
-                            <option value="">Tujuan Naskah</option>
-                            <option value="P3HPHL">P3HPHL</option>
-                            <option value="PEPHPHL">PEPHPHL</option>
-                            <option value="TU">Tata Usaha</option>
-                        </select>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <select id="yearFilter1" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
-                            <option value="">Semua Tahun</option>
-                        </select>
-                    </div>
+             <!-- Unified Controls -->
+            <div class="text-center mb-8">
+                <div class="flex justify-center items-center gap-3">
+                    <button id="showAllButton" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua</button>
+                    <button id="refreshDataButton" title="Paksa muat ulang data dari server" class="p-2 text-gray-500 hover:text-blue-600 transition duration-300 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                        <img id="refreshIcon" src="https://img.icons8.com/?size=100&id=11680&format=png&color=000000" alt="Muat Ulang" class="h-5 w-5">
+                    </button>
                 </div>
-                 <!-- Controls -->
-                <div class="text-center mb-8">
-                    <div class="flex justify-center items-center gap-3">
-                        <button id="showAllButton1" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua</button>
-                        <button id="refreshDataButton1" title="Paksa muat ulang data dari server" class="p-2 text-gray-500 hover:text-blue-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg id="refreshIcon1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                               <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="lastUpdatedStatus1" class="text-center text-xs text-gray-500 mt-2"></div>
-                </div>
-                <div id="statusMessage1" class="text-center text-gray-600 my-10"></div>
-                <div id="catalogContainer1" class="border border-gray-200 rounded-lg overflow-hidden"></div>
-                <!-- Pagination -->
-                <div id="paginationControls1" class="mt-6">
-                    <div id="paginationStatus1" class="text-center text-sm text-gray-600 mb-4"></div>
-                    <div id="paginationContainer1" class="flex justify-center items-center flex-wrap gap-2"></div>
-                </div>
+                <div id="lastUpdatedStatus" class="text-center text-xs text-gray-500 mt-2"></div>
             </div>
-
-            <!-- Tab 2: Surat Keluar -->
-            <div id="tabContent2" class="tab-content">
-                 <!-- Search and Filter Section -->
-                <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div class="relative flex-grow">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+            
+            <!-- Tab Content Area -->
+            <div id="tabContentContainer">
+                <!-- Tab 1: Surat Masuk -->
+                <div id="tabContent1" class="tab-content active">
+                    <!-- Search and Filter Section -->
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <input type="search" id="searchInput1" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cari di Arsip Surat Masuk...">
                         </div>
-                        <input type="search" id="searchInput2" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" placeholder="Cari di Arsip Surat Keluar...">
+                        <div class="flex-shrink-0">
+                            <select id="statusFilter1" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
+                                <option value="">Tujuan Naskah</option>
+                                <option value="P3HPHL">P3HPHL</option>
+                                <option value="PEPHPHL">PEPHPHL</option>
+                                <option value="TU">Tata Usaha</option>
+                            </select>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <select id="yearFilter1" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-full bg-white">
+                                <option value="">Semua Tahun</option>
+                            </select>
+                        </div>
                     </div>
-                     <div class="flex-shrink-0">
-                        <select id="yearFilter2" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition h-full bg-white">
-                            <option value="">Semua Tahun</option>
-                        </select>
+                    <div id="statusMessage1" class="text-center text-gray-600 my-10"></div>
+                    <div id="catalogContainer1"></div>
+                    <!-- Pagination -->
+                    <div id="paginationControls1" class="mt-6">
+                        <div id="paginationStatus1" class="text-center text-sm text-gray-600 mb-4"></div>
+                        <div id="paginationContainer1" class="flex justify-center items-center flex-wrap gap-2"></div>
                     </div>
                 </div>
-                 <!-- Controls -->
-                <div class="text-center mb-8">
-                    <div class="flex justify-center items-center gap-3">
-                        <button id="showAllButton2" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition duration-300 disabled:bg-gray-400">Tampilkan Semua</button>
-                        <button id="refreshDataButton2" title="Paksa muat ulang data dari server" class="p-2 text-gray-500 hover:text-green-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg id="refreshIcon2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                               <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+
+                <!-- Tab 2: Surat Keluar -->
+                <div id="tabContent2" class="tab-content">
+                     <!-- Search and Filter Section -->
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <input type="search" id="searchInput2" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" placeholder="Cari di Arsip Surat Keluar...">
+                        </div>
+                         <div class="flex-shrink-0">
+                            <select id="yearFilter2" class="w-full sm:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition h-full bg-white">
+                                <option value="">Semua Tahun</option>
+                            </select>
+                        </div>
                     </div>
-                    <div id="lastUpdatedStatus2" class="text-center text-xs text-gray-500 mt-2"></div>
-                </div>
-                <div id="statusMessage2" class="text-center text-gray-600 my-10"></div>
-                <div id="catalogContainer2" class="border border-gray-200 rounded-lg overflow-hidden"></div>
-                <!-- Pagination -->
-                <div id="paginationControls2" class="mt-6">
-                    <div id="paginationStatus2" class="text-center text-sm text-gray-600 mb-4"></div>
-                    <div id="paginationContainer2" class="flex justify-center items-center flex-wrap gap-2"></div>
+                    <div id="statusMessage2" class="text-center text-gray-600 my-10"></div>
+                    <div id="catalogContainer2"></div>
+                    <!-- Pagination -->
+                    <div id="paginationControls2" class="mt-6">
+                        <div id="paginationStatus2" class="text-center text-sm text-gray-600 mb-4"></div>
+                        <div id="paginationContainer2" class="flex justify-center items-center flex-wrap gap-2"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -167,7 +163,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.3.1.3</p>
+            <p class="font-mono">V.3.2.2</p>
         </footer>
     </div>
 
@@ -214,6 +210,7 @@
 
 
     <script>
+        // --- Global Config & Helpers ---
         const monthMap = {
             'januari': 0, 'jan': 0, 'februari': 1, 'feb': 1, 'maret': 2, 'mar': 2, 'april': 3, 'apr': 3,
             'mei': 4, 'juni': 5, 'jun': 5, 'juli': 6, 'jul': 6, 'agustus': 7, 'agu': 7, 'september': 8,
@@ -244,23 +241,18 @@
         
         function getGoogleDriveEmbedUrl(url) {
             let fileId = null;
-            // Coba format 1: /file/d/FILE_ID/view
             let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 fileId = match[1];
             } else {
-                // Coba format 2: open?id=FILE_ID
                 match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
                 if (match && match[1]) {
                     fileId = match[1];
                 }
             }
-            
             if (fileId) {
                 return `https://drive.google.com/file/d/${fileId}/preview`;
             }
-
-            // Fallback jika tidak ada format yang cocok
             return url.replace('/view', '/preview').replace('?usp=sharing', '');
         }
 
@@ -275,9 +267,11 @@
             });
         }
         
+        // --- Tab Management Class ---
         class TabManager {
-            constructor(tabId) {
+            constructor(tabId, app) {
                 this.tabId = tabId;
+                this.app = app;
                 this.allDocuments = [];
                 this.currentFilteredDocuments = [];
                 this.currentPage = 1;
@@ -288,10 +282,6 @@
                     searchInput: document.getElementById(`searchInput${tabId}`),
                     catalogContainer: document.getElementById(`catalogContainer${tabId}`),
                     statusMessage: document.getElementById(`statusMessage${tabId}`),
-                    showAllButton: document.getElementById(`showAllButton${tabId}`),
-                    refreshDataButton: document.getElementById(`refreshDataButton${tabId}`),
-                    refreshIcon: document.getElementById(`refreshIcon${tabId}`),
-                    lastUpdatedStatus: document.getElementById(`lastUpdatedStatus${tabId}`),
                     yearFilter: document.getElementById(`yearFilter${tabId}`),
                     statusFilter: document.getElementById(`statusFilter${tabId}`),
                     paginationContainer: document.getElementById(`paginationContainer${tabId}`),
@@ -315,13 +305,6 @@
                 this.elements.searchInput?.addEventListener('input', () => this.handleSearch());
                 this.elements.yearFilter?.addEventListener('change', () => this.handleSearch());
                 this.elements.statusFilter?.addEventListener('change', () => this.handleSearch());
-                this.elements.refreshDataButton?.addEventListener('click', () => this.fetchDataFromServer(true));
-                this.elements.showAllButton?.addEventListener('click', () => {
-                    if(this.elements.searchInput) this.elements.searchInput.value = '';
-                    if(this.elements.yearFilter) this.elements.yearFilter.value = '';
-                    if(this.elements.statusFilter) this.elements.statusFilter.value = '';
-                    this.handleSearch();
-                });
             }
 
             populateYearFilter() {
@@ -501,18 +484,7 @@
                     });
                 }
             }
-
-            updateLastUpdatedStatus(timestamp) {
-                const statusEl = this.elements.lastUpdatedStatus;
-                if (!timestamp) {
-                    statusEl.textContent = ''; return;
-                }
-                const date = new Date(parseInt(timestamp));
-                const time = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const day = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
-                statusEl.textContent = `Data terakhir diperbarui: ${day}, pukul ${time}`;
-            }
-
+            
             processData(data) {
                 this.allDocuments = data;
                 const fuseOptions = {
@@ -528,81 +500,6 @@
                 if(els.searchInput) els.searchInput.disabled = false;
                 if(els.yearFilter) els.yearFilter.disabled = false;
                 if(els.statusFilter) els.statusFilter.disabled = false;
-                els.showAllButton.disabled = false;
-                els.refreshDataButton.disabled = false;
-                if(els.searchInput) els.searchInput.placeholder = els.searchInput.placeholder.replace('Mohon tunggu...', '');
-                els.showAllButton.textContent = 'Tampilkan Semua';
-            }
-
-            async fetchDataFromServer(isForced = false) {
-                const els = this.elements;
-                els.statusMessage.textContent = isForced ? 'Memuat ulang data terbaru...' : 'Memuat data...';
-                if(els.searchInput) els.searchInput.disabled = true;
-                if(els.yearFilter) els.yearFilter.disabled = true;
-                if(els.statusFilter) els.statusFilter.disabled = true;
-                els.showAllButton.disabled = true;
-                els.refreshDataButton.disabled = true;
-                els.refreshIcon.classList.add('animate-spin-reverse');
-                if(els.searchInput) els.searchInput.placeholder = 'Mohon tunggu...';
-                els.showAllButton.textContent = 'Memuat...';
-
-                try {
-                    const response = await fetch(this.apiConfig.url);
-                    if (!response.ok) throw new Error(`Network response was not ok`);
-                    
-                    const jsonData = await response.json();
-                    
-                    const normalizedData = normalizeApiData(jsonData);
-                    
-                    const newData = normalizedData.filter(this.apiConfig.validLinkCheck);
-                    
-                    localStorage.setItem(this.apiConfig.cacheKey, JSON.stringify(newData));
-                    const newTimestamp = Date.now();
-                    localStorage.setItem(this.apiConfig.timestampKey, newTimestamp);
-
-                    if (isForced) {
-                        els.statusMessage.innerHTML = `<p class="text-green-600 font-semibold">Data berhasil diperbarui.</p>`;
-                        setTimeout(() => { els.statusMessage.innerHTML = ''; }, 3000);
-                    }
-
-                    this.processData(newData);
-                    this.updateLastUpdatedStatus(newTimestamp);
-
-                } catch (error) {
-                    console.error(`Gagal mengambil data untuk Tab ${this.tabId}:`, error);
-                    const errorHTML = `
-                        <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg text-left max-w-2xl mx-auto">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.031-1.742 3.031H4.42c-1.532 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 011-1h.008a1 1 0 011 1v3.012a1 1 0 01-1 1h-.008a1 1 0 01-1-1V5z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-bold text-red-800">Gagal Memuat Database</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <p>Terjadi kesalahan saat mencoba mengambil data. Periksa kembali koneksi internet Anda dan pastikan tautan API sudah benar.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    els.statusMessage.innerHTML = errorHTML;
-                } finally {
-                    els.refreshIcon.classList.remove('animate-spin-reverse');
-                }
-            }
-            
-            async initializeApp() {
-                const cachedData = localStorage.getItem(this.apiConfig.cacheKey);
-                const cachedTimestamp = localStorage.getItem(this.apiConfig.timestampKey);
-
-                if (cachedData && cachedTimestamp && (Date.now() - cachedTimestamp < CACHE_DURATION)) {
-                    this.elements.statusMessage.textContent = "Memuat data dari cache...";
-                    this.processData(JSON.parse(cachedData));
-                    this.updateLastUpdatedStatus(cachedTimestamp);
-                } else {
-                    await this.fetchDataFromServer(false);
-                }
             }
 
             handleSearch() {
@@ -647,37 +544,166 @@
                 this.displayPage();
             }
         }
-
-        const tab1 = new TabManager(1);
-        const tab2 = new TabManager(2);
         
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
+        // --- Main App Controller ---
+        class App {
+            constructor() {
+                this.tabs = {
+                    1: new TabManager(1, this),
+                    2: new TabManager(2, this)
+                };
+                this.elements = {
+                    showAllButton: document.getElementById('showAllButton'),
+                    refreshDataButton: document.getElementById('refreshDataButton'),
+                    refreshIcon: document.getElementById('refreshIcon'),
+                    lastUpdatedStatus: document.getElementById('lastUpdatedStatus'),
+                    tabButtons: document.querySelectorAll('.tab-button'),
+                    tabContents: document.querySelectorAll('.tab-content')
+                };
+                this.cacheDuration = 24 * 60 * 60 * 1000; // 24 hours
+                this.addEventListeners();
+            }
 
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.dataset.tab;
-                
-                tabButtons.forEach(btn => {
-                    btn.classList.remove('active', 'surat-masuk', 'surat-keluar');
+            addEventListeners() {
+                this.elements.refreshDataButton.addEventListener('click', () => this.fetchAllDataFromServer(true));
+                this.elements.showAllButton.addEventListener('click', () => {
+                    Object.values(this.tabs).forEach(tab => {
+                        if(tab.elements.searchInput) tab.elements.searchInput.value = '';
+                        if(tab.elements.yearFilter) tab.elements.yearFilter.value = '';
+                        if(tab.elements.statusFilter) tab.elements.statusFilter.value = '';
+                        tab.handleSearch();
+                    });
                 });
-                button.classList.add('active');
-                if (tabId === '1') {
-                    button.classList.add('surat-masuk');
-                } else {
-                    button.classList.add('surat-keluar');
-                }
 
+                this.elements.tabButtons.forEach(button => {
+                    button.addEventListener('click', () => this.switchTab(button.dataset.tab));
+                });
+            }
+            
+            switchTab(tabId) {
+                const isSuratMasuk = tabId === '1';
 
-                tabContents.forEach(content => {
+                this.elements.tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'surat-masuk', 'surat-keluar');
+                    if (btn.dataset.tab === tabId) {
+                        btn.classList.add('active', isSuratMasuk ? 'surat-masuk' : 'surat-keluar');
+                    }
+                });
+
+                this.elements.tabContents.forEach(content => {
                     if (content.id === `tabContent${tabId}`) {
                         content.classList.add('active');
                     } else {
                         content.classList.remove('active');
                     }
                 });
-            });
-        });
+            }
+            
+            updateLastUpdatedStatus(timestamp) {
+                if (!timestamp) {
+                    this.elements.lastUpdatedStatus.textContent = ''; return;
+                }
+                const date = new Date(parseInt(timestamp));
+                const time = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const day = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+                this.elements.lastUpdatedStatus.textContent = `Data terakhir diperbarui: ${day}, pukul ${time}`;
+            }
+            
+            async fetchAllDataFromServer(isForced = false) {
+                const els = this.elements;
+                els.showAllButton.textContent = 'Memuat...';
+                els.refreshIcon.classList.add('animate-spin-reverse');
+                els.showAllButton.disabled = true;
+                els.refreshDataButton.disabled = true;
+
+                Object.values(this.tabs).forEach(tab => {
+                    tab.elements.statusMessage.textContent = isForced ? 'Memuat ulang data terbaru...' : 'Memuat data...';
+                    if (tab.elements.searchInput) tab.elements.searchInput.disabled = true;
+                    if (tab.elements.yearFilter) tab.elements.yearFilter.disabled = true;
+                    if (tab.elements.statusFilter) tab.elements.statusFilter.disabled = true;
+                });
+
+                try {
+                    const fetchPromises = Object.values(this.tabs).map(async tab => {
+                        const response = await fetch(tab.apiConfig.url);
+                        if (!response.ok) throw new Error(`Network error for ${tab.apiConfig.url}`);
+                        const jsonData = await response.json();
+                        const normalizedData = normalizeApiData(jsonData);
+                        const newData = normalizedData.filter(tab.apiConfig.validLinkCheck);
+                        localStorage.setItem(tab.apiConfig.cacheKey, JSON.stringify(newData));
+                        return newData;
+                    });
+                    
+                    await Promise.all(fetchPromises);
+                    
+                    const newTimestamp = Date.now();
+                    Object.values(this.tabs).forEach(tab => localStorage.setItem(tab.apiConfig.timestampKey, newTimestamp));
+                    
+                    if (isForced) {
+                        this.tabs[1].elements.statusMessage.innerHTML = `<p class="text-green-600 font-semibold">Data berhasil diperbarui.</p>`;
+                        this.tabs[2].elements.statusMessage.innerHTML = '';
+                        setTimeout(() => { this.tabs[1].elements.statusMessage.innerHTML = ''; }, 3000);
+                    }
+                    
+                    this.updateLastUpdatedStatus(newTimestamp);
+                    this.initializeTabs(true); // isRefreshed = true
+
+                } catch (error) {
+                    console.error('Gagal mengambil data:', error);
+                    const errorHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg text-left max-w-2xl mx-auto">
+                           <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.031-1.742 3.031H4.42c-1.532 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 011-1h.008a1 1 0 011 1v3.012a1 1 0 01-1 1h-.008a1 1 0 01-1-1V5z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-red-800">Gagal Memuat Database</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <p>Terjadi kesalahan saat mencoba mengambil data. Periksa kembali koneksi internet Anda dan pastikan tautan API sudah benar.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    this.tabs[1].elements.statusMessage.innerHTML = errorHTML;
+                } finally {
+                    els.refreshIcon.classList.remove('animate-spin-reverse');
+                    els.showAllButton.disabled = false;
+                    els.refreshDataButton.disabled = false;
+                    els.showAllButton.textContent = 'Tampilkan Semua';
+                }
+            }
+
+            initializeTabs(isRefreshed = false) {
+                let needsFetching = false;
+                const timestamps = [];
+                Object.values(this.tabs).forEach(tab => {
+                    const cachedData = localStorage.getItem(tab.apiConfig.cacheKey);
+                    const cachedTimestamp = localStorage.getItem(tab.apiConfig.timestampKey);
+                    
+                    if (cachedData && cachedTimestamp && (Date.now() - cachedTimestamp < this.cacheDuration)) {
+                        console.log(`Loading tab ${tab.tabId} from cache.`);
+                        if(!isRefreshed) tab.elements.statusMessage.textContent = "Memuat data dari cache...";
+                        tab.processData(JSON.parse(cachedData));
+                        timestamps.push(cachedTimestamp);
+                    } else {
+                        needsFetching = true;
+                    }
+                });
+
+                if (timestamps.length > 0) {
+                    this.updateLastUpdatedStatus(Math.max(...timestamps));
+                }
+
+                if(needsFetching) {
+                     console.log("Cache usang atau kosong. Mengambil semua data dari server.");
+                     this.fetchAllDataFromServer(false);
+                }
+            }
+        }
+        
+        const app = new App();
 
         function toggleDetails(tabId, docIndex) {
             const detailsContent = document.getElementById(`details-${tabId}-${docIndex}`);
@@ -741,10 +767,7 @@
             }
         });
 
-        window.addEventListener('load', () => {
-            tab1.initializeApp();
-            tab2.initializeApp();
-        });
+        window.addEventListener('load', () => app.initializeTabs());
 
         // --- Scroll to Top Logic ---
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
