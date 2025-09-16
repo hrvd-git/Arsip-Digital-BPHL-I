@@ -16,7 +16,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
-            background-color: #f9fafb; /* bg-gray-50 */
+            background-color: #f9fafb;
         }
         button:disabled {
             cursor: not-allowed;
@@ -25,16 +25,15 @@
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
         .pagination-btn.active {
-            background-color: #2563eb; /* bg-blue-600 */
+            background-color: #2563eb;
             color: white;
-            border-color: #2563eb; /* border-blue-600 */
+            border-color: #2563eb;
         }
-        @keyframes spin-reverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .animate-spin-reverse {
-            animation: spin-reverse 1s linear infinite;
+        .animate-spin-slow {
+            animation: spin 1.5s linear infinite;
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -44,12 +43,12 @@
             border-bottom: 3px solid transparent;
         }
         .tab-button.active.surat-masuk {
-            border-color: #3b82f6; /* border-blue-500 */
+            border-color: #3b82f6;
             color: #3b82f6;
             font-weight: 600;
         }
         .tab-button.active.surat-keluar {
-            border-color: #16a34a; /* border-green-600 */
+            border-color: #16a34a;
             color: #16a34a;
             font-weight: 600;
         }
@@ -168,7 +167,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.3.1.0</p>
+            <p class="font-mono">V.3.1.3</p>
         </footer>
     </div>
 
@@ -181,17 +180,34 @@
     
     <!-- Preview Modal -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg w-full h-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center p-4 border-b">
-                <h3 id="modalTitle" class="font-semibold text-lg">Pratinjau Dokumen</h3>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                <h3 id="modalTitle" class="font-semibold text-lg truncate pr-4">Pratinjau Dokumen</h3>
+                <div class="flex items-center gap-4">
+                    <a id="modalNewTabLink" href="#" target="_blank" class="text-sm text-blue-600 hover:underline">Buka di Tab Baru</a>
+                    <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div class="p-2 flex-grow">
-                <iframe id="previewIframe" class="w-full h-full border-0" src=""></iframe>
+            <div id="modalContent" class="p-2 flex-grow relative">
+                <div id="modalLoader" class="absolute inset-0 bg-white flex flex-col items-center justify-center">
+                    <svg class="animate-spin-slow h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                     <p class="mt-4 text-sm text-gray-600">Memuat pratinjau...</p>
+                </div>
+                 <div id="modalError" class="hidden absolute inset-0 bg-white flex flex-col items-center justify-center p-4 text-center">
+                    <svg class="h-12 w-12 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h4 class="mt-4 font-semibold text-red-800">Gagal Memuat Pratinjau</h4>
+                    <p class="mt-2 text-sm text-gray-600">Pratinjau untuk dokumen ini mungkin diblokir. Silakan gunakan tombol "Buka di Tab Baru" untuk melihatnya.</p>
+                </div>
+                <iframe id="previewIframe" class="w-full h-full border-0" src="about:blank"></iframe>
             </div>
         </div>
     </div>
@@ -224,6 +240,28 @@
                 }
             }
             return new Date(0);
+        }
+        
+        function getGoogleDriveEmbedUrl(url) {
+            let fileId = null;
+            // Coba format 1: /file/d/FILE_ID/view
+            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                fileId = match[1];
+            } else {
+                // Coba format 2: open?id=FILE_ID
+                match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    fileId = match[1];
+                }
+            }
+            
+            if (fileId) {
+                return `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+
+            // Fallback jika tidak ada format yang cocok
+            return url.replace('/view', '/preview').replace('?usp=sharing', '');
         }
 
         function normalizeApiData(data) {
@@ -331,7 +369,7 @@
                             </div>
                             <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
                                 <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">Lihat Detail</button>
-                                <button onclick="showPreviewModal('${doc.link_surat}', event)" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Pratinjau</button>
+                                <button onclick="showPreviewModal('${doc.link_surat}', '${doc.no_surat || 'Dokumen'}', event)" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Pratinjau</button>
                             </div>
                         </div>
                         <div id="details-${this.tabId}-${index}" class="details-content">
@@ -366,7 +404,7 @@
                             </div>
                             <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
                                 <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">Lihat Detail</button>
-                                <button onclick="showPreviewModal('${doc.link_surat}', event)" class="inline-block w-full sm:w-auto text-center bg-green-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-green-700 transition duration-300">Pratinjau</button>
+                                <button onclick="showPreviewModal('${doc.link_surat}', '${doc.no_surat || 'Dokumen'}', event)" class="inline-block w-full sm:w-auto text-center bg-green-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-green-700 transition duration-300">Pratinjau</button>
                             </div>
                         </div>
                         <div id="details-${this.tabId}-${index}" class="details-content">
@@ -378,8 +416,7 @@
                                     <p><strong class="font-medium text-gray-500">Jenis Naskah:</strong> ${doc.jenis_naskah || '-'}</p>
                                     <p><strong class="font-medium text-gray-500">Tanggal Surat:</strong> ${doc.tgl_surat || '-'}</p>
                                     <p><strong class="font-medium text-gray-500">Masa Berlaku:</strong> ${doc.masa_berlaku || '-'}</p>
-                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen || '-'}</p>
-                                    <div class="md:col-span-2"><strong class="font-medium text-gray-500">Deskripsi:</strong> ${doc.deskripsi_surat || '-'}</div>
+                                    <p><strong class="font-medium text-gray-500">Lokasi Dokumen:</strong> ${doc.lokasi_dokumen || '-'}</div>
                                 </div>
                             </div>
                         </div>
@@ -657,26 +694,50 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const previewIframe = document.getElementById('previewIframe');
         const modalTitle = document.getElementById('modalTitle');
+        const modalLoader = document.getElementById('modalLoader');
+        const modalError = document.getElementById('modalError');
+        const modalNewTabLink = document.getElementById('modalNewTabLink');
 
-        function showPreviewModal(url, event) {
-            event.stopPropagation(); // Mencegah dropdown detail terbuka
-            // Mengubah link Google Drive agar bisa di-embed
-            const embedUrl = url.replace('/view', '/preview').replace('?usp=sharing', '');
-            modalTitle.textContent = "Pratinjau Dokumen";
-            previewIframe.src = embedUrl;
+        let previewTimeout;
+
+        function showPreviewModal(url, title, event) {
+            event.stopPropagation();
+            const embedUrl = getGoogleDriveEmbedUrl(url);
+            
+            modalTitle.textContent = `Pratinjau: ${title}`;
+            modalNewTabLink.href = url;
+            
+            previewIframe.src = 'about:blank';
+            modalLoader.classList.remove('hidden');
+            modalError.classList.add('hidden');
+            previewIframe.classList.add('hidden');
+            
             previewModal.classList.remove('hidden');
+            
+            previewIframe.onload = () => {
+                clearTimeout(previewTimeout);
+                modalLoader.classList.add('hidden');
+                previewIframe.classList.remove('hidden');
+            };
+
+            previewTimeout = setTimeout(() => {
+                modalLoader.classList.add('hidden');
+                modalError.classList.remove('hidden');
+            }, 5000);
+
+            previewIframe.src = embedUrl;
         }
 
-        closeModalBtn.addEventListener('click', () => {
+        function hidePreviewModal() {
             previewModal.classList.add('hidden');
-            previewIframe.src = ''; // Menghentikan pemuatan iframe
-        });
+            previewIframe.src = 'about:blank';
+            clearTimeout(previewTimeout);
+        }
 
-        // Menutup modal jika klik di luar area konten
+        closeModalBtn.addEventListener('click', hidePreviewModal);
         previewModal.addEventListener('click', (event) => {
             if (event.target === previewModal) {
-                previewModal.classList.add('hidden');
-                previewIframe.src = '';
+                hidePreviewModal();
             }
         });
 
