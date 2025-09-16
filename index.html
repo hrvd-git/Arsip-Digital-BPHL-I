@@ -53,6 +53,9 @@
             color: #16a34a;
             font-weight: 600;
         }
+        #previewModal.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -165,7 +168,7 @@
         <!-- Footer -->
         <footer class="flex justify-between items-center mt-8 text-sm text-gray-500">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.3.0.4</p>
+            <p class="font-mono">V.3.1.0</p>
         </footer>
     </div>
 
@@ -175,6 +178,24 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
         </svg>
     </button>
+    
+    <!-- Preview Modal -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg w-full h-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modalTitle" class="font-semibold text-lg">Pratinjau Dokumen</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-2 flex-grow">
+                <iframe id="previewIframe" class="w-full h-full border-0" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const monthMap = {
@@ -310,7 +331,7 @@
                             </div>
                             <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
                                 <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">Lihat Detail</button>
-                                <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Buka Tautan</a>
+                                <button onclick="showPreviewModal('${doc.link_surat}', event)" class="inline-block w-full sm:w-auto text-center bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300">Pratinjau</button>
                             </div>
                         </div>
                         <div id="details-${this.tabId}-${index}" class="details-content">
@@ -345,7 +366,7 @@
                             </div>
                             <div class="flex-shrink-0 w-full sm:w-auto flex items-center gap-2 mt-3 sm:mt-0">
                                 <button type="button" class="inline-block w-full sm:w-auto text-center bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-gray-700 transition duration-300">Lihat Detail</button>
-                                <a href="${doc.link_surat}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-block w-full sm:w-auto text-center bg-green-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-green-700 transition duration-300">Buka Tautan</a>
+                                <button onclick="showPreviewModal('${doc.link_surat}', event)" class="inline-block w-full sm:w-auto text-center bg-green-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-green-700 transition duration-300">Pratinjau</button>
                             </div>
                         </div>
                         <div id="details-${this.tabId}-${index}" class="details-content">
@@ -632,6 +653,33 @@
             }
         }
         
+        const previewModal = document.getElementById('previewModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const previewIframe = document.getElementById('previewIframe');
+        const modalTitle = document.getElementById('modalTitle');
+
+        function showPreviewModal(url, event) {
+            event.stopPropagation(); // Mencegah dropdown detail terbuka
+            // Mengubah link Google Drive agar bisa di-embed
+            const embedUrl = url.replace('/view', '/preview').replace('?usp=sharing', '');
+            modalTitle.textContent = "Pratinjau Dokumen";
+            previewIframe.src = embedUrl;
+            previewModal.classList.remove('hidden');
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            previewModal.classList.add('hidden');
+            previewIframe.src = ''; // Menghentikan pemuatan iframe
+        });
+
+        // Menutup modal jika klik di luar area konten
+        previewModal.addEventListener('click', (event) => {
+            if (event.target === previewModal) {
+                previewModal.classList.add('hidden');
+                previewIframe.src = '';
+            }
+        });
+
         window.addEventListener('load', () => {
             tab1.initializeApp();
             tab2.initializeApp();
@@ -652,3 +700,4 @@
     </script>
 </body>
 </html>
+
