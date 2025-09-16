@@ -1,104 +1,149 @@
 Changelog Aplikasi Arsip Digital BPHL Wilayah I
 
 Dokumen ini mencatat semua perubahan dan penambahan fitur pada aplikasi dari waktu ke waktu.
+Versi 3 (Update Kritis)
+V.3.1.3 - (16 September 2025)
+
+    Perbaikan Fungsionalitas Kritis:
+
+        Merombak total logika pratinjau dokumen untuk mengatasi masalah izin akses.
+
+        Aplikasi sekarang memiliki logika URL cerdas yang secara otomatis mengubah berbagai format tautan Google Drive (/view, open?id=, dll.) menjadi format /preview yang paling kompatibel, meningkatkan keandalan pratinjau secara signifikan.
+
+V.3.1.2 - (16 September 2025)
+
+    Perbaikan UI/UX & Fungsionalitas:
+
+        Menyempurnakan fitur pratinjau modal agar lebih andal dan informatif.
+
+        Menambahkan deteksi kegagalan muat otomatis pada pratinjau iframe.
+
+        Jika pratinjau diblokir oleh Google, sekarang akan muncul pesan peringatan yang mengarahkan pengguna untuk menggunakan tombol "Buka di Tab Baru".
+
+V.3.1.1 - (16 September 2025)
+
+    Perbaikan UI/UX & Fungsionalitas:
+
+        Menyempurnakan fitur pratinjau modal agar lebih andal.
+
+        Menambahkan indikator memuat (loading spinner) di dalam jendela pratinjau.
+
+        Menambahkan tombol cadangan "Buka di Tab Baru" di dalam modal jika pratinjau gagal dimuat.
+
+V.3.1.0 - (16 September 2025)
+
+    Fitur Major (UI/UX):
+
+        Implementasi Pratinjau Dokumen Modal: Mengganti fungsionalitas tombol "Buka Tautan" yang membuka tab baru.
+
+V.3.0.4 - (15 September 2025)
+
+    Perbaikan UI/UX:
+
+        Merancang ulang total tampilan tombol tab menjadi lebih elegan dan minimalis dengan indikator garis bawah.
+
+V.3.0.3 - (15 September 2025)
+
+    Perbaikan UI/UX:
+
+        Merancang ulang total tampilan tombol tab agar menyerupai tab folder fisik.
+
+V.3.0.2 - (15 September 2025)
+
+    Perbaikan UI/UX:
+
+        Merancang ulang tampilan tombol tab "Surat Masuk" dan "Surat Keluar" agar lebih modern.
+
+V.3.0.1 - (15 September 2025)
+
+    Perbaikan Bug Kritis:
+
+        Memperbaiki masalah di mana data tidak muncul sama sekali meskipun koneksi ke API berhasil.
+
+V.3.0.0 - (15 September 2025)
+
+    Pembaruan Kritis:
+
+        Menaikkan versi aplikasi ke 3.0.0 untuk menandai rilis stabil yang kaya fitur.
+
 Versi 2 (Update Kritis)
+V.2.7.0 - (15 September 2025)
+
+    Fitur Major:
+
+        Implementasi Antarmuka Tab: Merombak total aplikasi untuk mendukung dua tab pencarian terpisah ("Surat Masuk" dan "Surat Keluar").
+
 V.2.6.1 - (14 September 2025)
 
     Perbaikan Bug Kritis:
 
         Memperbaiki masalah di mana hasil pencarian "fuzzy search" terasa tidak teratur.
 
-        Logika diubah: filter diterapkan terlebih dahulu, baru pencarian fuzzy.
-
-        Hasil pencarian sekarang diurutkan berdasarkan relevansi (jika ada kata kunci) atau tanggal terbaru (jika tidak ada kata kunci), bukan keduanya secara bersamaan.
-
 V.2.6.0 - (14 September 2025)
 
     Fitur Major:
 
-        Implementasi pencarian dinamis (fuzzy search) untuk mengatasi kesalahan ketik (typo) pada database.
-
-        Pencarian sekarang dapat menemukan kata kunci yang mirip, meskipun tidak sama persis (misal: "setifikasi" akan menemukan "sertifikasi").
+        Implementasi pencarian dinamis (fuzzy search) untuk mengatasi kesalahan ketik (typo).
 
 V.2.5.2 - (14 September 2025)
 
     Perbaikan Fungsionalitas:
 
-        Meningkatkan kemampuan filter "Tujuan Naskah" agar menggunakan pencarian parsial (tidak harus sama persis) dan tidak membedakan huruf besar/kecil.
-
-        Mengubah label filter dari "TU" menjadi "Tata Usaha" untuk kejelasan.
+        Meningkatkan kemampuan filter "Tujuan Naskah" agar menggunakan pencarian parsial.
 
 V.2.5.1 - (14 September 2025)
 
     Perbaikan Minor:
 
-        Mengubah teks default pada filter status menjadi "Tujuan Naskah".
-
-        Mengatur filter tahun agar secara default menampilkan "Semua Tahun" saat aplikasi dimuat.
+        Mengubah teks default dan perilaku filter.
 
 V.2.5.0 - (14 September 2025)
 
     Fitur Major:
 
-        Penambahan dropdown filter baru di sebelah filter tahun untuk menyaring dokumen berdasarkan status_dokumen.
-
-        Opsi filter yang tersedia adalah P3HPHL, PEPHPHL, dan TU.
+        Penambahan dropdown filter berdasarkan status_dokumen.
 
 V.2.4.1 - (14 September 2025)
 
     Perbaikan Bug Kritis:
 
-        Memperbaiki masalah di mana data tidak muncul saat menggunakan API SheetDB.io.
-
-        Aplikasi sekarang secara otomatis menormalkan nama kolom yang diterima dari API (menghapus sufiks ::[nama_sheet]) untuk memastikan data dapat diproses dengan benar.
+        Memperbaiki masalah data tidak muncul saat menggunakan API SheetDB.io.
 
 V.2.4.0 - (14 September 2025)
 
     Perubahan Arsitektur & Fitur Major:
 
-        Migrasi Kembali ke API Langsung: Mengganti metode pengambilan data dari CORS Proxy ke koneksi API langsung menggunakan layanan SheetDB.io untuk stabilitas dan performa maksimal.
-
-        Menghapus ketergantungan pada proxy publik secara permanen.
-
-        Aplikasi sekarang kembali memproses data dalam format JSON.
-
-        Menghapus field lokasi_dokumen dari tampilan detail sesuai permintaan.
+        Migrasi Kembali ke API Langsung (SheetDB.io).
 
 V.2.3.1 - (14 September 2025)
 
     Perbaikan Minor:
 
-        Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi masalah "Gagal Memuat Database".
+        Mengganti layanan proxy ke corsproxy.io.
 
 V.2.3.0 - (14 September 2025)
 
     Perubahan Arsitektur:
 
-        Kembali ke Metode Proxy: Mengembalikan metode pengambilan data dari Google Apps Script ke CORS Proxy untuk menyederhanakan alur kerja dan mengatasi masalah deployment.
-
-        Aplikasi sekarang kembali memproses data dalam format CSV.
-
-        Menggunakan layanan proxy allorigins.win.
+        Kembali ke Metode Proxy.
 
 V.2.2.5 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Menyediakan panduan deployment ulang yang lebih spesifik untuk mengatasi error persisten pada Google Apps Script.
+        Menyediakan panduan deployment ulang yang lebih spesifik.
 
 V.2.2.4 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Menyediakan panduan diagnosis baru (Panduan_Cek_Akses.md) untuk membantu pengguna memverifikasi pengaturan akses publik pada Google Apps Script.
+        Menyediakan panduan diagnosis baru.
 
 V.2.2.3 - (11 September 2025)
 
     Perbaikan Kritis:
 
-        Memperbarui URL database ke Google Apps Script yang sudah diperbaiki dan diverifikasi.
-
-        Aplikasi sekarang sepenuhnya terhubung ke sumber data yang stabil dan andal, menghilangkan ketergantungan pada proxy.
+        Memperbarui URL database ke Google Apps Script yang sudah diverifikasi.
 
 V.2.2.2 - (11 September 2025)
 
@@ -106,83 +151,77 @@ V.2.2.2 - (11 September 2025)
 
         Memperbarui file aplikasi dengan tautan Google Apps Script yang benar.
 
-        Menyediakan panduan verifikasi final untuk memastikan pengguna menyalin URL deployment yang aktif.
-
 V.2.2.1 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Mengembalikan penggunaan proxy untuk sementara waktu guna mengatasi NetworkError pada koneksi langsung ke Google Apps Script.
+        Mengembalikan penggunaan proxy untuk sementara waktu.
 
 V.2.2.0 - (11 September 2025)
 
     Fitur Major & Perbaikan Kritis:
 
-        Migrasi dari Proxy ke Google Apps Script: Menghapus ketergantungan pada proxy publik dan mengimplementasikan koneksi langsung ke Google Apps Script untuk pengambilan data yang lebih cepat dan stabil.
-
-        Aplikasi sekarang memproses data dalam format JSON, bukan lagi CSV.
+        Migrasi dari Proxy ke Google Apps Script.
 
 V.2.1.7 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Mengganti layanan proxy ke alternatif lain (allorigins.win) untuk mengatasi NetworkError.
+        Mengganti layanan proxy.
 
 V.2.1.6 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi NetworkError.
+        Mengganti layanan proxy.
 
 V.2.1.5 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Mengganti layanan proxy ke alternatif lain (thingproxy.freeboard.io) untuk mengatasi NetworkError.
+        Mengganti layanan proxy.
 
 V.2.1.4 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Mengganti layanan proxy (codetabs.com) ke alternatif lain untuk mengatasi NetworkError.
+        Mengganti layanan proxy.
 
 V.2.1.3 - (11 September 2025)
 
     Perbaikan Bug:
 
-        Memperbaiki dan menyederhanakan logika pencarian untuk memastikan semua kata kunci (termasuk tahun) dicari secara konsisten di semua kolom.
+        Memperbaiki dan menyederhanakan logika pencarian.
 
 V.2.1.2 - (11 September 2025)
 
     Perbaikan Minor:
 
-        Peningkatan tampilan pesan error saat database gagal dimuat.
+        Peningkatan tampilan pesan error database.
 
 V.2.1.1 - (11 September 2025)
 
     Perbaikan Bug:
 
-        Memperbaiki logika pengurutan tanggal (parseRobustDate) agar dapat mengenali berbagai format tanggal.
+        Memperbaiki logika pengurutan tanggal.
 
 V.2.1.0 - (11 September 2025)
 
     Fitur Major:
 
-        Menambahkan fungsionalitas pengurutan (sorting) otomatis pada hasil pencarian berdasarkan tgl_surat terbaru.
+        Menambahkan fungsionalitas pengurutan otomatis.
 
 V.2.0.5 - (14 September 2025)
 
     Perbaikan Bug:
 
-        Mengembalikan metode pengambilan data ke CORS Proxy (kembali ke arsitektur v.2.0.4).
-
-        Memperbarui layanan proxy ke allorigins.win yang lebih stabil untuk mengatasi masalah data tidak muncul.
+        Mengembalikan metode pengambilan data ke CORS Proxy.
 
 V.2.0.4 - (08 September 2025)
 
     Perbaikan Minor:
 
-        Memperbarui tautan database utama ke sumber Google Sheet yang baru.
+        Memperbarui tautan database.
 
 V.2.0.3 - (08 September 2025)
 
@@ -200,15 +239,13 @@ V.2.0.1 - (08 September 2025)
 
     Perbaikan Minor:
 
-        Ikon "muat ulang" diubah menjadi ikon panah melingkar.
-
-        Menambahkan animasi berputar pada ikon saat proses muat ulang.
+        Ikon "muat ulang" diubah.
 
 V.2.0.0 - (08 September 2025)
 
     Fitur Major:
 
-        Implementasi sistem cache menggunakan localStorage.
+        Implementasi sistem cache localStorage.
 
 Versi 1
 
