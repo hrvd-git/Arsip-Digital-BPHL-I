@@ -1,5 +1,15 @@
 Changelog
 Versi 3 (Update)
+
+V.3.2.4 - (16 September 2025)
+
+    Memperbaiki bug TypeError yang disebabkan oleh penghapusan tombol "Tampilkan Semua" pada versi sebelumnya.
+
+V.3.2.3 - (16 September 2025)
+
+    Menghapus tombol "Tampilkan Semua".
+    Memindahkan tombol "Sinkronisasi Data" & info "Data Terakhir Diperbarui" ke bawah navigasi tab.
+
 V.3.2.2 – 16 September 2025
 
 Perbaikan UI/UX
