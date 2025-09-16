@@ -1,93 +1,285 @@
-Changelog Aplikasi Arsip Digital BPHL Wilayah I
+Changelog
+Versi 3 (Update)
+V.3.2.2 – 16 September 2025
 
-Dokumen ini mencatat semua perubahan dan penambahan fitur pada aplikasi dari waktu ke waktu.
-Versi 3 (Update Kritis)
-V.3.2.2 - (16 September 2025)
+Perbaikan UI/UX
+Mengganti ikon "muat ulang data" dengan gambar baru dari icons8.com sesuai permintaan.
+Memastikan animasi berputar tetap berfungsi pada ikon baru saat sinkronisasi.
 
-    Perbaikan UI/UX:
+V.3.2.1 – 16 September 2025
 
-        Mengganti ikon "muat ulang data" dengan gambar baru dari icons8.com sesuai permintaan.
+Perbaikan UI/UX
+Mengembalikan desain tombol "muat ulang data" ke gaya sebelumnya (ikon dengan latar belakang lingkaran) sesuai permintaan pengguna.
+Memastikan animasi berputar tetap berfungsi saat sinkronisasi data.
 
-        Memastikan animasi berputar tetap berfungsi pada ikon baru saat sinkronisasi.
+V.3.2.0 – 16 September 2025
 
-V.3.2.1 - (16 September 2025)
+Fitur Major & Peningkatan Performa
+Sinkronisasi Data Terpadu: tombol "muat ulang" kini memperbarui data untuk kedua tab (Surat Masuk & Surat Keluar) secara bersamaan.
+Cache 24 Jam: masa berlaku cache diperpanjang dari 4 jam menjadi 24 jam untuk mengurangi frekuensi pemuatan data dari server.
+Indikator "data terakhir diperbarui" kini menampilkan status sinkronisasi untuk seluruh aplikasi.
 
-    Perbaikan UI/UX:
+V.3.1.3 – 16 September 2025
 
-        Mengembalikan desain tombol "muat ulang data" ke gaya sebelumnya (ikon dengan latar belakang lingkaran) sesuai permintaan pengguna.
+Perbaikan Fungsionalitas Kritis
+Merombak total logika pratinjau dokumen untuk mengatasi masalah izin akses.
+Menambahkan logika URL cerdas: otomatis mengubah berbagai format tautan Google Drive (/view, open?id=, dll.) menjadi format /preview yang lebih kompatibel, sehingga meningkatkan keandalan pratinjau.
 
-        Memastikan animasi berputar tetap berfungsi saat sinkronisasi data.
+V.3.1.2 – 16 September 2025
 
-V.3.2.0 - (16 September 2025)
+Perbaikan UI/UX & Fungsionalitas
+Menyempurnakan fitur pratinjau modal agar lebih andal dan informatif.
+Menambahkan deteksi kegagalan muat otomatis pada pratinjau iframe.
 
-    Fitur Major & Peningkatan Performa:
+V.3.1.1 – 16 September 2025
 
-        Sinkronisasi Data Terpadu: Tombol "muat ulang" sekarang memperbarui data untuk kedua tab ("Surat Masuk" & "Surat Keluar") secara bersamaan.
+Perbaikan UI/UX & Fungsionalitas
+Menyempurnakan fitur pratinjau modal agar lebih andal.
+Menambahkan indikator loading spinner dan tombol cadangan "Buka di Tab Baru".
 
-        Cache 24 Jam: Masa berlaku cache data diperpanjang dari 4 jam menjadi 24 jam untuk mengurangi frekuensi pemuatan data dari server.
+V.3.1.0 – 16 September 2025
 
-        Indikator "data terakhir diperbarui" sekarang menampilkan status sinkronisasi untuk seluruh aplikasi.
+Fitur Major (UI/UX)
+Implementasi Pratinjau Dokumen Modal, menggantikan tombol "Buka Tautan" yang sebelumnya membuka tab baru.
 
-V.3.1.3 - (16 September 2025)
+V.3.0.4 – 15 September 2025
 
-    Perbaikan Fungsionalitas Kritis:
+Perbaikan UI/UX
+Merancang ulang total tampilan tombol tab menjadi lebih elegan dan minimalis dengan indikator garis bawah.
 
-        Merombak total logika pratinjau dokumen untuk mengatasi masalah izin akses.
+V.3.0.3 – 15 September 2025
 
-        Aplikasi sekarang memiliki logika URL cerdas yang secara otomatis mengubah berbagai format tautan Google Drive (/view, open?id=, dll.) menjadi format /preview yang paling kompatibel, meningkatkan keandalan pratinjau secara signifikan.
+Perbaikan UI/UX
+Merancang ulang total tampilan tombol tab agar menyerupai tab folder fisik.
 
-V.3.1.2 - (16 September 2025)
+V.3.0.2 – 15 September 2025
 
-    Perbaikan UI/UX & Fungsionalitas:
+Perbaikan UI/UX
+Merancang ulang tampilan tombol tab "Surat Masuk" dan "Surat Keluar" agar lebih modern.
 
-        Menyempurnakan fitur pratinjau modal agar lebih andal dan informatif.
+V.3.0.1 – 15 September 2025
 
-        Menambahkan deteksi kegagalan muat otomatis pada pratinjau iframe.
+Perbaikan Bug Kritis
+Memperbaiki masalah di mana data tidak muncul meskipun koneksi ke API berhasil.
 
-V.3.1.1 - (16 September 2025)
+V.3.0.0 – 15 September 2025
 
-    Perbaikan UI/UX & Fungsionalitas:
+Implementasi Antarmuka Tab
+Merombak total aplikasi untuk mendukung dua tab pencarian terpisah (Surat Masuk dan Surat Keluar).
 
-        Menyempurnakan fitur pratinjau modal agar lebih andal.
+Versi 2 (Update)
+V.2.6.1 – 14 September 2025
 
-        Menambahkan indikator memuat (loading spinner) dan tombol cadangan "Buka di Tab Baru".
+Perbaikan Bug Kritis
+Memperbaiki masalah hasil pencarian fuzzy search yang terasa tidak teratur.
+Logika diperbarui: filter diterapkan lebih dulu, baru pencarian fuzzy.
+Hasil pencarian kini diurutkan berdasarkan relevansi (jika ada kata kunci) atau tanggal terbaru (jika tidak ada kata kunci), bukan keduanya sekaligus.
 
-V.3.1.0 - (16 September 2025)
+V.2.6.0 – 14 September 2025
 
-    Fitur Major (UI/UX):
+Fitur Major
+Implementasi pencarian dinamis (fuzzy search) untuk mengatasi kesalahan ketik pada database.
+Pencarian dapat menemukan kata kunci mirip, meskipun tidak sama persis (contoh: "setifikasi" → "sertifikasi").
 
-        Implementasi Pratinjau Dokumen Modal: Mengganti fungsionalitas tombol "Buka Tautan" yang membuka tab baru.
+V.2.5.2 – 14 September 2025
 
-V.3.0.4 - (15 September 2025)
+Perbaikan Fungsionalitas
+Meningkatkan kemampuan filter Tujuan Naskah dengan pencarian parsial (tidak harus sama persis, case-insensitive).
+Mengubah label filter dari "TU" menjadi "Tata Usaha" untuk kejelasan.
 
-    Perbaikan UI/UX:
+V.2.5.1 – 14 September 2025
 
-        Merancang ulang total tampilan tombol tab menjadi lebih elegan dan minimalis dengan indikator garis bawah.
+Perbaikan Minor
+Mengubah teks default filter status menjadi "Tujuan Naskah".
+Mengatur filter tahun agar default ke "Semua Tahun" saat aplikasi dimuat.
 
-V.3.0.3 - (15 September 2025)
+V.2.5.0 – 14 September 2025
 
-    Perbaikan UI/UX:
+Fitur Major
+Penambahan dropdown filter baru di sebelah filter tahun untuk menyaring dokumen berdasarkan status_dokumen.
+Opsi filter: P3HPHL, PEPHPHL, TU.
 
-        Merancang ulang total tampilan tombol tab agar menyerupai tab folder fisik.
+V.2.4.1 – 14 September 2025
 
-V.3.0.2 - (15 September 2025)
+Perbaikan Bug Kritis
+Memperbaiki masalah data tidak muncul saat menggunakan API SheetDB.io.
+Aplikasi kini otomatis menormalkan nama kolom (menghapus sufiks ::[nama_sheet]) agar data dapat diproses dengan benar.
 
-    Perbaikan UI/UX:
+V.2.4.0 – 14 September 2025
 
-        Merancang ulang tampilan tombol tab "Surat Masuk" dan "Surat Keluar" agar lebih modern.
+Perubahan Arsitektur & Fitur Major
+Migrasi kembali ke API langsung (menggunakan SheetDB.io) untuk stabilitas dan performa maksimal.
+Menghapus ketergantungan pada proxy publik secara permanen.
+Aplikasi kembali memproses data dalam format JSON.
+Menghapus field lokasi_dokumen dari tampilan detail sesuai permintaan.
 
-V.3.0.1 - (15 September 2025)
+V.2.3.1 – 14 September 2025
 
-    Perbaikan Bug Kritis:
+Perbaikan Minor
+Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi masalah "Gagal Memuat Database".
 
-        Memperbaiki masalah di mana data tidak muncul sama sekali meskipun koneksi ke API berhasil.
+V.2.3.0 – 14 September 2025
 
-V.3.0.0 - (15 September 2025)
+Perubahan Arsitektur
+Kembali ke metode proxy: pengambilan data dari Google Apps Script ke CORS Proxy.
+Data diproses dalam format CSV.
+Menggunakan layanan proxy allorigins.win.
 
-    Pembaruan Kritis:
+V.2.2.5 – 11 September 2025
 
-        Menaikkan versi aplikasi ke 3.0.0 untuk menandai rilis stabil yang kaya fitur.
+Perbaikan Minor
+Menyediakan panduan deployment ulang yang lebih spesifik untuk mengatasi error persisten pada Google Apps Script.
 
-Versi 2 (Update Kritis)
+V.2.2.4 – 11 September 2025
 
-    Semua versi sebelumnya dirangkum hingga V.2.7.0.
+Perbaikan Minor
+Menyediakan panduan diagnosis baru (Panduan_Cek_Akses.md) untuk memverifikasi pengaturan akses publik Google Apps Script.
+
+V.2.2.3 – 11 September 2025
+
+Perbaikan Kritis
+Memperbarui URL database Google Apps Script yang telah diperbaiki dan diverifikasi.
+Aplikasi kini sepenuhnya terhubung ke sumber data stabil, menghilangkan ketergantungan pada proxy.
+
+V.2.2.2 – 11 September 2025
+
+Perbaikan Minor
+Memperbarui file aplikasi dengan tautan Google Apps Script yang benar.
+Menambahkan panduan verifikasi final untuk memastikan URL deployment aktif.
+
+V.2.2.1 – 11 September 2025
+
+Perbaikan Minor
+Mengembalikan penggunaan proxy sementara untuk mengatasi NetworkError pada koneksi langsung.
+
+V.2.2.0 – 11 September 2025
+
+Fitur Major & Perbaikan Kritis
+Migrasi dari proxy ke Google Apps Script untuk pengambilan data lebih cepat dan stabil.
+Data kini diproses dalam format JSON (bukan CSV).
+
+V.2.1.7 – 11 September 2025
+
+Perbaikan Minor
+Mengganti layanan proxy ke alternatif lain (allorigins.win) untuk mengatasi NetworkError.
+
+V.2.1.6 – 11 September 2025
+
+Perbaikan Minor
+Mengganti layanan proxy ke alternatif lain (corsproxy.io) untuk mengatasi NetworkError.
+
+V.2.1.5 – 11 September 2025
+
+Perbaikan Minor
+Mengganti layanan proxy ke alternatif lain (thingproxy.freeboard.io) untuk mengatasi NetworkError.
+
+V.2.1.4 – 11 September 2025
+
+Perbaikan Minor
+Mengganti layanan proxy (codetabs.com) ke alternatif lain untuk mengatasi NetworkError.
+
+V.2.1.3 – 11 September 2025
+
+Perbaikan Bug
+Menyederhanakan logika pencarian agar semua kata kunci (termasuk tahun) dicari konsisten di semua kolom.
+
+V.2.1.2 – 11 September 2025
+
+Perbaikan Minor
+Peningkatan tampilan pesan error saat database gagal dimuat.
+
+V.2.1.1 – 11 September 2025
+
+Perbaikan Bug
+Memperbaiki logika pengurutan tanggal (parseRobustDate) agar mendukung berbagai format.
+
+V.2.1.0 – 11 September 2025
+
+Fitur Major
+Menambahkan fungsionalitas pengurutan otomatis hasil pencarian berdasarkan tgl_surat terbaru.
+
+V.2.0.5 – 14 September 2025
+
+Perbaikan Bug
+Mengembalikan metode pengambilan data ke CORS Proxy (seperti v.2.0.4).
+Memperbarui layanan proxy ke allorigins.win agar lebih stabil.
+
+V.2.0.4 – 08 September 2025
+
+Perbaikan Minor
+Memperbarui tautan database utama ke Google Sheet baru.
+
+V.2.0.3 – 08 September 2025
+
+Perbaikan Minor
+Memperbaiki arah animasi "muat ulang".
+
+V.2.0.2 – 08 September 2025
+
+Perbaikan Minor
+Memperbaiki perilaku scroll halaman.
+
+V.2.0.1 – 08 September 2025
+
+Perbaikan Minor
+Ikon "muat ulang" diubah menjadi ikon panah melingkar.
+Menambahkan animasi berputar pada ikon saat proses muat ulang.
+
+V.2.0.0 – 08 September 2025
+
+Fitur Major
+Implementasi sistem cache menggunakan localStorage.
+
+Versi 1
+V.1.6.0 – 08 September 2025
+
+Peningkatan Pagination
+Desain & fungsionalitas pagination diperbaiki.
+Menambahkan tombol Previous (<) dan Next (>).
+Implementasi pemendekan otomatis (...) jika jumlah halaman terlalu banyak.
+
+V.1.5.0 – 08 September 2025
+
+Fitur Major
+Implementasi sistem pagination, membatasi hasil pencarian menjadi 15 item per halaman.
+
+V.1.4.1 – 08 September 2025
+
+Perbaikan Minor
+Penambahan pesan error yang lebih spesifik jika database gagal dimuat.
+
+V.1.4.0 – 08 September 2025
+
+Fitur Major
+Penambahan dropdown filter berdasarkan tahun di sebelah bilah pencarian.
+Filter otomatis terisi dengan daftar tahun dari data.
+Default filter diatur ke tahun terkini.
+
+V.1.3.1 – 08 September 2025
+
+Perbaikan Minor
+Pembaruan tautan database Google Sheet ke sheet lain.
+
+V.1.3.0 – 08 September 2025
+
+Fitur Minor
+Penambahan tombol "Kembali ke Atas" di pojok kanan bawah.
+
+V.1.2.1 – 08 September 2025
+Perbaikan Minor
+Pembaruan tautan database Google Sheet.
+
+V.1.2.0 – 08 September 2025
+
+Fitur Minor
+Filter otomatis hanya menampilkan baris dengan link_surat valid (harus diawali https://drive.google.com).
+
+V.1.1.0 – 08 September 2025
+
+Fitur Minor
+Penambahan footer dengan informasi tim & versi aplikasi.
+
+V.1.0.0 – 08 September 2025
+
+Rilis Awal
+Aplikasi dengan satu bidang pencarian, tampilan daftar, dan detail dropdown.
