@@ -76,7 +76,7 @@
             </div>
             
             <!-- Tab Navigation -->
-            <div class="relative mb-4">
+            <div class="relative mb-8">
                 <div class="flex border-b border-gray-200">
                     <button class="tab-button surat-masuk active flex-1 py-3 px-1 text-center text-sm font-medium text-gray-500 hover:text-blue-600" data-tab="1">
                         Surat Masuk
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- Unified Controls -->
+             <!-- Unified Controls -->
             <div class="flex items-center gap-3 mb-6">
                 <button id="refreshDataButton" title="Paksa muat ulang data dari server" class="p-2 text-gray-500 hover:text-blue-600 transition duration-300 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
                     <img id="refreshIcon" src="https://img.icons8.com/?size=100&id=11680&format=png&color=000000" alt="Muat Ulang" class="h-5 w-5">
@@ -160,7 +160,7 @@
         <!-- Footer -->
         <footer class="mt-8 text-sm text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p>Tim Arsiparis Balai Pengelolaan Hutan Lestari Wilayah I 2025</p>
-            <p class="font-mono">V.3.2.5</p>
+            <p class="font-mono">V.3.2.6</p>
         </footer>
     </div>
 
@@ -215,24 +215,87 @@
         };
 
         function parseRobustDate(dateStr) {
-            if (!dateStr || typeof dateStr !== 'string') return new Date(0);
-            const cleanStr = dateStr.replace(/,/g, '').toLowerCase();
-            const wordParts = cleanStr.split(' ');
-            if (wordParts.length >= 3) {
-                const year = parseInt(wordParts[wordParts.length - 1], 10);
-                const monthName = wordParts.find(p => monthMap[p] !== undefined);
-                const day = parseInt(wordParts.find(p => /^\d{1,2}$/.test(p)), 10);
-                const month = monthMap[monthName];
-                if (!isNaN(day) && !isNaN(year) && month !== undefined) return new Date(year, month, day);
+            if (!dateStr) return new Date(0);
+            // Handle number type (Excel serial date) if passed directly
+            if (typeof dateStr === 'number') {
+                 return new Date(Math.round((dateStr - 25569) * 86400 * 1000));
             }
-            const dateParts = cleanStr.split(/[-/]/);
-            if (dateParts.length === 3) {
-                const p1 = parseInt(dateParts[0]), p2 = parseInt(dateParts[1]), p3 = parseInt(dateParts[2]);
-                if (!isNaN(p1) && !isNaN(p2) && !isNaN(p3)) {
-                    if (p1 > 1000) return new Date(p1, p2 - 1, p3);
-                    if (p3 > 1000) return new Date(p3, p2 - 1, p1);
+            if (typeof dateStr !== 'string') return new Date(0);
+            
+            let cleanStr = dateStr.toLowerCase().trim();
+            
+            // Hapus nama hari bahasa Indonesia/Inggris
+            const days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu', 
+                          'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            days.forEach(day => {
+                cleanStr = cleanStr.replace(day, '');
+            });
+            
+            // Hapus karakter aneh, sisakan huruf, angka, spasi, -, /
+            cleanStr = cleanStr.replace(/[^a-z0-9\s\-\/]/g, ' ').trim();
+            
+            // Coba deteksi format dengan nama bulan
+            const parts = cleanStr.split(/[\s\-\/]+/);
+            
+            let year = -1, month = -1, day = -1;
+            
+            // 1. Cari Tahun (4 digit)
+            for (let i = 0; i < parts.length; i++) {
+                if (/^\d{4}$/.test(parts[i])) {
+                    year = parseInt(parts[i], 10);
+                    parts.splice(i, 1); // Hapus tahun dari array
+                    break;
                 }
             }
+            
+            // 2. Cari Bulan (Text)
+            for (let i = 0; i < parts.length; i++) {
+                if (monthMap[parts[i]] !== undefined) {
+                    month = monthMap[parts[i]];
+                    parts.splice(i, 1);
+                    break;
+                }
+            }
+            
+            // 3. Cari Hari (1-2 digit)
+            for (let i = 0; i < parts.length; i++) {
+                if (/^\d{1,2}$/.test(parts[i])) {
+                    day = parseInt(parts[i], 10);
+                    break;
+                }
+            }
+            
+            if (year !== -1 && month !== -1 && day !== -1) {
+                return new Date(year, month, day);
+            }
+            
+            // --- Fallback: Coba format angka murni ---
+            const numParts = cleanStr.split(/[\s\-\/]+/);
+            
+            // YYYY-MM-DD (ISO)
+            if (numParts.length === 3 && numParts[0].length === 4) {
+                 return new Date(parseInt(numParts[0]), parseInt(numParts[1]) - 1, parseInt(numParts[2]));
+            }
+            
+            // DD-MM-YYYY atau MM-DD-YYYY
+            if (numParts.length === 3) {
+                const n1 = parseInt(numParts[0], 10);
+                const n2 = parseInt(numParts[1], 10);
+                const n3 = parseInt(numParts[2], 10); // Asumsi tahun di belakang
+                
+                if (n3 > 1000) { 
+                     if (n2 > 12) { // Format MM/DD/YYYY (bulan pasti < 12, jadi n2 > 12 harus hari)
+                         return new Date(n3, n1 - 1, n2);
+                     } else { // Default ke DD/MM/YYYY
+                         return new Date(n3, n2 - 1, n1);
+                     }
+                }
+            }
+            
+            // Last resort
+            const standardDate = new Date(dateStr);
+            if (!isNaN(standardDate.getTime())) return standardDate;
+
             return new Date(0);
         }
         
@@ -484,6 +547,9 @@
             
             processData(data) {
                 this.allDocuments = data;
+                // Pre-sort documents by date descending immediately when data is loaded
+                this.allDocuments.sort((a, b) => parseRobustDate(b.tgl_surat) - parseRobustDate(a.tgl_surat));
+
                 const fuseOptions = {
                     keys: this.apiConfig.fuseKeys,
                     includeScore: false, threshold: 0.4, ignoreLocation: true
@@ -522,7 +588,9 @@
                     });
                     finalResults = localFuse.search(searchTerm).map(result => result.item);
                 } else {
+                    // If no search term, maintain the date sort (already sorted in processData, but re-sort to be safe)
                     finalResults = preFilteredData;
+                     // Explicitly sort again to ensure order
                     finalResults.sort((a, b) => parseRobustDate(b.tgl_surat) - parseRobustDate(a.tgl_surat));
                 }
 
@@ -769,4 +837,3 @@
     </script>
 </body>
 </html>
-
