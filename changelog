@@ -1,6 +1,11 @@
 Changelog
 Versi 3 (Update)
 
+V.3.2.6 - (26 November 2025)
+
+    Meningkatkan kecerdasan fungsi parseRobustDate untuk mengatasi inkonsistensi penulisan tanggal pada database.
+    Sekarang mendukung format teks bahasa Indonesia lengkap (contoh: "Rabu, 01 Oktober 2025") dengan cara mengabaikan nama hari dan mendeteksi bulan secara cerdas.
+    Memperbaiki logika fallback untuk format tanggal numerik (DD/MM/YYYY vs MM/DD/YYYY) agar data bulan lama tetap terbaca dengan benar.
 
 V.3.2.5 - (16 September 2025)
 
